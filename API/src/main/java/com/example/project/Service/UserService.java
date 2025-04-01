@@ -6,15 +6,12 @@ import com.example.project.Repository.UserRepository;
 import com.example.project.Request.UserRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
-import java.beans.Transient;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -23,17 +20,25 @@ public class UserService {
     private final UserMapper userMapper;
 
     @Transactional
-    public ResponseEntity<String> createUser(UserRequest userRequest) {
+    public ResponseEntity<Map<String, Object>> createUser(UserRequest userRequest) {
+        Map<String, Object> response = new HashMap<>();
+
         if (userRepository.existsByEmail(userRequest.getEmail())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email đã tồn tại");
+            response.put("status", HttpStatus.BAD_REQUEST.value());
+            response.put("message", "Email đã tồn tại");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
         try {
             User user = userMapper.userRequestToUser(userRequest);
             userRepository.save(user);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Tạo tài khoản thành công");
+
+            response.put("status", HttpStatus.CREATED.value());
+            response.put("message", "Tạo tài khoản thành công");
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi: " + e.getMessage());
+            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.put("message", "Lỗi: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-
 }

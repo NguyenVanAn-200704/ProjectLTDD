@@ -26,7 +26,6 @@ public class User implements Serializable {
     @Column(nullable = false)
     String name;
 
-    @Column(nullable = false)
     String avatar;
 
     @OneToMany(mappedBy = "createBy", cascade = CascadeType.ALL)
