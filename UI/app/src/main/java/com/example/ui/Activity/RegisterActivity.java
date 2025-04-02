@@ -25,7 +25,7 @@ import retrofit2.Response;
 public class RegisterActivity extends AppCompatActivity {
     EditText editTextEmail;
     EditText editTextPassword;
-    EditText editTextRePassword;
+    EditText editTextConfirmPassword;
     EditText editTextName;
     Button buttonRegister;
     UserRequest userRequest;
@@ -45,10 +45,10 @@ public class RegisterActivity extends AppCompatActivity {
         });
 
         buttonRegister.setOnClickListener(v -> {
-            if (editTextPassword.getText().toString().equals(editTextRePassword.getText().toString())) {
+            if (editTextPassword.getText().toString().equals(editTextConfirmPassword.getText().toString())) {
                 if (editTextEmail.getText().toString().isEmpty() ||
                         editTextPassword.getText().toString().isEmpty() ||
-                        editTextRePassword.getText().toString().isEmpty() ||
+                        editTextConfirmPassword.getText().toString().isEmpty() ||
                         editTextName.getText().toString().isEmpty()) {
                     Toast.makeText(RegisterActivity.this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
                     return;
@@ -67,7 +67,7 @@ public class RegisterActivity extends AppCompatActivity {
     private void mapping() {
         editTextEmail = findViewById(R.id.editTextEmail);
         editTextPassword = findViewById(R.id.editTextPassword);
-        editTextRePassword = findViewById(R.id.editTextRePassword);
+        editTextConfirmPassword = findViewById(R.id.editTextConfirmPassword);
         editTextName = findViewById(R.id.editTextName);
         buttonRegister = findViewById(R.id.buttonRegister);
     }
