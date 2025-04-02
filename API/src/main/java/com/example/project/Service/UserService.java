@@ -31,7 +31,6 @@ public class UserService {
         try {
             User user = userMapper.userRequestToUser(userRequest);
             userRepository.save(user);
-
             response.put("status", HttpStatus.CREATED.value());
             response.put("message", "Tạo tài khoản thành công");
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -41,4 +40,6 @@ public class UserService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+
 }
