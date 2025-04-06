@@ -55,17 +55,16 @@ public class UserService {
         }
 
         User user = optionalUser.get();
+
         if (!user.getPassword().equals(loginRequest.getPassword())) {
             response.put("status", HttpStatus.BAD_REQUEST.value());
             response.put("message", "Mật khẩu không đúng !");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
 
-        // Đăng nhập thành công
         response.put("status", HttpStatus.OK.value());
         response.put("message", "Đăng nhập thành công");
-        response.put("user", user); // nếu muốn trả thêm user info
-
+        response.put("user", user);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
