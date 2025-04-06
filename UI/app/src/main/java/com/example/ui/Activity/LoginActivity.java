@@ -1,8 +1,11 @@
 package com.example.ui.Activity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -28,6 +31,7 @@ public class LoginActivity extends AppCompatActivity {
     EditText editTextEmail;
     EditText editTextPassword;
     Button buttonLogin;
+    TextView textViewRegister;
     LoginRequest loginRequest;
 
     @Override
@@ -54,12 +58,22 @@ public class LoginActivity extends AppCompatActivity {
                 login();
             }
         });
+
+        textViewRegister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
     }
 
     private void mapping() {
         editTextEmail = findViewById(R.id.editTextEmail);
         editTextPassword = findViewById(R.id.editTextPassword);
         buttonLogin = findViewById(R.id.buttonLogin);
+        textViewRegister = findViewById(R.id.textViewRegister);
     }
 
     private void login() {
@@ -85,7 +99,6 @@ public class LoginActivity extends AppCompatActivity {
                         String errorJson = response.errorBody().string();
                         JSONObject jsonObject = new JSONObject(errorJson);
 
-                        // Lấy lỗi đầu tiên từ message
                         String message = jsonObject.has("message") ? jsonObject.getString("message") : "Đăng nhập thất bại!";
                         Toast.makeText(LoginActivity.this, "⚠ " + message, Toast.LENGTH_LONG).show();
                     } catch (Exception e) {
