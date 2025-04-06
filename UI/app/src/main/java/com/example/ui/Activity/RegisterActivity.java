@@ -16,6 +16,9 @@ import com.example.ui.Request.UserRequest;
 import com.example.ui.Retrofit.APIService;
 import com.example.ui.Retrofit.RetrofitCilent;
 
+import org.json.JSONObject;
+
+import java.util.Iterator;
 import java.util.Map;
 
 import retrofit2.Call;
@@ -80,18 +83,25 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    // Lấy thông tin từ Map trả về
                     Map<String, Object> responseBody = response.body();
-
-                    // Lấy message từ response
                     String message = responseBody.get("message").toString();
-                    int status = ((Number) responseBody.get("status")).intValue(); // Chuyển về kiểu số
+                    int status = ((Number) responseBody.get("status")).intValue();
 
-                    // Hiển thị thông báo theo trạng thái
                     if (status == 201) {
                         Toast.makeText(RegisterActivity.this, "✅ " + message, Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(RegisterActivity.this, "⚠ " + message, Toast.LENGTH_SHORT).show();
+                    }
+                } else if (response.errorBody() != null) {
+                    try {
+                        String errorJson = response.errorBody().string();
+                        JSONObject jsonObject = new JSONObject(errorJson);
+
+                        // Lấy lỗi đầu tiên từ message
+                        String message = jsonObject.has("message") ? jsonObject.getString("message") : "Đăng ký thất bại!";
+                        Toast.makeText(RegisterActivity.this, "⚠ " + message, Toast.LENGTH_LONG).show();
+                    } catch (Exception e) {
+                        Toast.makeText(RegisterActivity.this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     Toast.makeText(RegisterActivity.this, "Đăng ký thất bại!", Toast.LENGTH_SHORT).show();
