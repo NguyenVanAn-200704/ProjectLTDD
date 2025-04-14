@@ -102,6 +102,10 @@ public class RegisterActivity extends AppCompatActivity {
 
                     if (status == 201) {
                         Toast.makeText(RegisterActivity.this, "✅ : " + message, Toast.LENGTH_SHORT).show();
+
+                        Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                        startActivity(intent);
+                        finish();
                     } else {
                         Toast.makeText(RegisterActivity.this, "Lỗi 1: " + message, Toast.LENGTH_SHORT).show();
                     }
@@ -122,7 +126,7 @@ public class RegisterActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                Toast.makeText(RegisterActivity.this, "Lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(RegisterActivity.this, "Lỗi 4: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

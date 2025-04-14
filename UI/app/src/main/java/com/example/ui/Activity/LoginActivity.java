@@ -87,11 +87,11 @@ public class LoginActivity extends AppCompatActivity {
                     Map<String, Object> responseBody = response.body();
                     String message = responseBody.get("message").toString();
                     int status = ((Number) responseBody.get("status")).intValue();
-                    if(status == 201){
-                        Toast.makeText(LoginActivity.this, "LoginActivity: " + message, Toast.LENGTH_SHORT).show();
+                    if(status == 200){
+                        Toast.makeText(LoginActivity.this, "✅ : " + message, Toast.LENGTH_SHORT).show();
                     }
                     else{
-                        Toast.makeText(LoginActivity.this, "LoginActivity: " + message, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this, "❌ : " + message, Toast.LENGTH_SHORT).show();
                     }
                 }
                 else if (response.errorBody() != null) {
@@ -100,18 +100,18 @@ public class LoginActivity extends AppCompatActivity {
                         JSONObject jsonObject = new JSONObject(errorJson);
 
                         String message = jsonObject.has("message") ? jsonObject.getString("message") : "Đăng nhập thất bại!";
-                        Toast.makeText(LoginActivity.this, "⚠ " + message, Toast.LENGTH_LONG).show();
+                        Toast.makeText(LoginActivity.this, "❌ : " + message, Toast.LENGTH_LONG).show();
                     } catch (Exception e) {
-                        Toast.makeText(LoginActivity.this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this, "Lỗi 1: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(LoginActivity.this, "Đăng nhập thất bại!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "❌ : Đăng nhập thất bại!", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                Toast.makeText(LoginActivity.this, "Lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginActivity.this, "Lỗi 2: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -67,5 +67,4 @@ public class UserService {
         response.put("user", user);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-
 }

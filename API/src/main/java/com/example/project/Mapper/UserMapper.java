@@ -13,4 +13,3 @@ public interface UserMapper {
     @Mapping(target = "tasks", ignore = true)
     User userRequestToUser(UserRequest userRequest);
 }
-
