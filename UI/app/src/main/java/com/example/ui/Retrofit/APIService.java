@@ -1,5 +1,6 @@
 package com.example.ui.Retrofit;
 
+import com.example.ui.Request.CreateProjectRequest;
 import com.example.ui.Request.LoginRequest;
 import com.example.ui.Request.UserRequest;
 
@@ -16,4 +17,7 @@ public interface APIService {
 
     @POST("/user/login")
     Call<Map<String, Object>> login(@Body LoginRequest loginRequest);
+
+    @POST("/project/create")
+    Call<Map<String, Object>> createProject(@Body CreateProjectRequest createProjectRequest);
 }

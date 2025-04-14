@@ -1,10 +1,13 @@
-package com.example.ui;
+package com.example.ui.Adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.example.ui.Model.TaskTemp;
+import com.example.ui.R;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;

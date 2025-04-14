@@ -8,8 +8,8 @@ import android.widget.LinearLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ui.R;
-import com.example.ui.TaskTemp;
-import com.example.ui.TaskTempAdapter;
+import com.example.ui.Model.TaskTemp;
+import com.example.ui.Adapter.TaskTempAdapter;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

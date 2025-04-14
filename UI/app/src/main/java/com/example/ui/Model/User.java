@@ -1,4 +1,4 @@
-package com.example.ui;
+package com.example.ui.Model;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.example.ui;
+package com.example.ui.Model;
 
 import com.example.ui.Enum.ProjectRole;
 

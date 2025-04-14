@@ -6,16 +6,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.example.ui.R;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -77,7 +72,7 @@ public class ProfileActivity extends AppCompatActivity {
         btnProfile = findViewById(R.id.btnProfile);
         edtFullName = findViewById(R.id.edtFullName);
         edtEmail = findViewById(R.id.edtEmail);
-        btnEdit = findViewById(R.id.btnEdit);
+        btnEdit = findViewById(R.id.buttonAddProject);
         btnSave = findViewById(R.id.btnSave);
         uploadImg = findViewById(R.id.btnUploadImg);
 

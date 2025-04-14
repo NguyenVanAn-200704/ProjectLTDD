@@ -26,7 +26,8 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity><activity
+        </activity>
+        <activity
             android:name=".Activity.AddTaskActivity"
             android:exported="true">
             <intent-filter>
@@ -34,7 +35,8 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity><activity
+        </activity>
+        <activity
             android:name=".Activity.AddProjectActivity"
             android:exported="true">
             <intent-filter>
@@ -63,6 +65,15 @@
         </activity>
         <activity
             android:name=".Activity.HomePageActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".Activity.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

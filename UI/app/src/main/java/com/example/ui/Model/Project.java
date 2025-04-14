@@ -1,4 +1,4 @@
-package com.example.ui;
+package com.example.ui.Model;
 
 public class Project {
     private Integer id;

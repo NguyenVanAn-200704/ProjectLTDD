@@ -3,22 +3,15 @@ package com.example.ui.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.ui.Project;
-import com.example.ui.ProjectAdapter;
 import com.example.ui.R;
-import com.example.ui.Task;
-import com.example.ui.TaskAdapter;
-import com.example.ui.User;
+import com.example.ui.Model.Task;
+import com.example.ui.Adapter.TaskAdapter;
+import com.example.ui.Model.User;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
