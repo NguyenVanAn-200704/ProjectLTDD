@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F7F4F0"
+    android:padding="16dp"
+    tools:context=".Activity.AddTaskActivity">
+
+    <!-- Tiêu đề và biểu tượng -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="156dp"
+        android:paddingStart="16dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:id="@+id/tvProjectTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="New Task"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btnAssign"
+            android:layout_width="wrap_content"
+            android:layout_height="59dp"
+            android:layout_below="@+id/imgTaskIcon"
+            android:layout_alignParentEnd="true"
+            android:layout_gravity="end"
+            android:layout_marginStart="46dp"
+            android:layout_marginTop="42dp"
+            android:layout_marginEnd="2dp"
+            android:layout_toEndOf="@+id/tvProjectTitle"
+            android:backgroundTint="#E7E0DA"
+            android:text="Assign"
+            android:textColor="#000000" />
+
+        <ImageView
+            android:id="@+id/imgTaskIcon"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="14dp"
+            android:src="@drawable/ic_logo" />
+    </RelativeLayout>
+
+    <!-- Container box -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:background="#E0E0E0"
+        android:padding="16dp"
+        android:layout_margin="16dp"
+        android:gravity="center_horizontal">
+
+        <EditText
+            android:id="@+id/edtTaskTitle"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:hint="Full Name"
+            android:background="#908B89"
+            android:textColor="#FFFFFF"
+            android:padding="10dp"
+            android:textSize="16sp"
+            android:text="Task Title"
+            android:layout_marginBottom="15dp" />
+
+        <EditText
+            android:id="@+id/edtTaskDecript"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:hint="Email"
+            android:background="#908B89"
+            android:textColor="#FFFFFF"
+            android:padding="10dp"
+            android:textSize="16sp"
+            android:text="Decription"
+            android:layout_marginBottom="15dp" />
+        <Spinner
+            android:id="@+id/spinnerTaskPriority"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:background="#908B89"
+            android:layout_marginBottom="15dp"
+            android:padding="10dp"
+            android:spinnerMode="dropdown" />
+        <EditText
+            android:id="@+id/edtTaskDue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Due at"
+            android:background="#908B89"
+            android:textColor="#FFFFFF"
+            android:clickable="true"
+            android:focusable="false"
+            android:padding="10dp"
+            android:textSize="16sp"
+            android:layout_marginBottom="15dp" />
+        <Button
+            android:id="@+id/btnEdit"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:text="Add" />
+
+    </LinearLayout>
+
+    <!-- Bottom Navigation -->
+    <include
+        android:layout_marginTop="20dp"
+        layout="@layout/item_bottom_nav"
+        android:layout_width="match_parent"
+        android:layout_height="64dp" />
+</LinearLayout>

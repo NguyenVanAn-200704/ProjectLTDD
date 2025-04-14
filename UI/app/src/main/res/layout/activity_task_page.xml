@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F7F4F0"
+    android:padding="16dp"
+    tools:context=".Activity.TaskPageActivity">
+
+    <!-- Tiêu đề và biểu tượng -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="12dp"
+        android:paddingBottom="8dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
+
+        <TextView
+            android:id="@+id/tvTaskTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Your Tasks"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <ImageView
+            android:id="@+id/imgTaskIcon"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_logo" />
+    </RelativeLayout>
+
+    <!-- Thanh tìm kiếm -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#D9D9D9"
+        android:padding="4dp"
+        android:layout_marginBottom="12dp"
+        android:gravity="center_vertical">
+
+        <EditText
+            android:id="@+id/edtSearchTask"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="40dp"
+            android:hint="Search tasks..."
+            android:background="#F6F1F1"
+            android:paddingStart="8dp"
+            android:inputType="text" />
+
+        <ImageButton
+            android:id="@+id/btnFilter"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_filter"
+            android:background="@android:color/transparent"
+            android:contentDescription="Filter"
+            android:scaleType="fitCenter"
+            android:layout_marginHorizontal="10sp"/>
+
+        <ImageButton
+            android:id="@+id/btnSearch"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_search"
+            android:background="@android:color/transparent"
+            android:contentDescription="Search"
+            android:scaleType="fitCenter"
+            android:layout_marginHorizontal="10sp"/>
+    </LinearLayout>
+
+    <!-- Danh sách Task -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:layout_marginTop="4dp"
+        android:backgroundTint="#D9D9D9"
+        android:clipToPadding="false"
+        android:elevation="2dp"
+        android:gravity="center"
+        android:background="@drawable/bg_project_container">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:id="@+id/taskListContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:divider="?android:attr/dividerVertical"
+                android:showDividers="middle"
+                android:dividerPadding="4dp" />
+        </ScrollView>
+    </LinearLayout>
+
+    <!-- Bottom Navigation -->
+    <include
+        android:layout_marginTop="20dp"
+        layout="@layout/item_bottom_nav"
+        android:layout_width="match_parent"
+        android:layout_height="64dp" />
+</LinearLayout>
