@@ -3,6 +3,7 @@ package com.example.project.Service;
 import com.example.project.Entity.User;
 import com.example.project.Mapper.UserMapper;
 import com.example.project.Repository.UserRepository;
+import com.example.project.Request.LoginRequest;
 import com.example.project.Request.UserRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -41,5 +43,28 @@ public class UserService {
         }
     }
 
+    @Transactional
+    public ResponseEntity<Map<String, Object>> login(LoginRequest loginRequest) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<User> optionalUser = userRepository.findByEmail(loginRequest.getEmail());
 
+        if (optionalUser.isEmpty()) {
+            response.put("status", HttpStatus.BAD_REQUEST.value());
+            response.put("message", "Email không tồn tại !");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        User user = optionalUser.get();
+
+        if (!user.getPassword().equals(loginRequest.getPassword())) {
+            response.put("status", HttpStatus.BAD_REQUEST.value());
+            response.put("message", "Mật khẩu không đúng !");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        response.put("status", HttpStatus.OK.value());
+        response.put("message", "Đăng nhập thành công");
+        response.put("user", user);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }

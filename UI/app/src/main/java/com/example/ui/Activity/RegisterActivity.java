@@ -1,8 +1,11 @@
 package com.example.ui.Activity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -16,6 +19,8 @@ import com.example.ui.Request.UserRequest;
 import com.example.ui.Retrofit.APIService;
 import com.example.ui.Retrofit.RetrofitCilent;
 
+import org.json.JSONObject;
+
 import java.util.Map;
 
 import retrofit2.Call;
@@ -28,6 +33,7 @@ public class RegisterActivity extends AppCompatActivity {
     EditText editTextConfirmPassword;
     EditText editTextName;
     Button buttonRegister;
+    TextView textViewLogin;
     UserRequest userRequest;
 
     @Override
@@ -50,16 +56,25 @@ public class RegisterActivity extends AppCompatActivity {
                         editTextPassword.getText().toString().isEmpty() ||
                         editTextConfirmPassword.getText().toString().isEmpty() ||
                         editTextName.getText().toString().isEmpty()) {
-                    Toast.makeText(RegisterActivity.this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
-                    return;
+                    Toast.makeText(RegisterActivity.this, "Vui lòng nhập đầy đủ thông tin !", Toast.LENGTH_SHORT).show();
+                } else {
+                    userRequest = new UserRequest(editTextEmail.getText().toString(),
+                            editTextPassword.getText().toString(),
+                            editTextName.getText().toString(),
+                            "abcxyz");
+                    register();
                 }
-                userRequest = new UserRequest(editTextEmail.getText().toString(),
-                        editTextPassword.getText().toString(),
-                        editTextName.getText().toString(),
-                        "abcxyz");
-                register();
             } else {
                 Toast.makeText(RegisterActivity.this, "Mật khẩu không trùng khớp !", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        textViewLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                startActivity(intent);
+                finish();
             }
         });
     }
@@ -70,6 +85,7 @@ public class RegisterActivity extends AppCompatActivity {
         editTextConfirmPassword = findViewById(R.id.editTextConfirmPassword);
         editTextName = findViewById(R.id.editTextName);
         buttonRegister = findViewById(R.id.buttonRegister);
+        textViewLogin = findViewById(R.id.textViewLogin);
     }
 
     private void register() {
@@ -80,27 +96,37 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    // Lấy thông tin từ Map trả về
                     Map<String, Object> responseBody = response.body();
-
-                    // Lấy message từ response
                     String message = responseBody.get("message").toString();
-                    int status = ((Number) responseBody.get("status")).intValue(); // Chuyển về kiểu số
+                    int status = ((Number) responseBody.get("status")).intValue();
 
-                    // Hiển thị thông báo theo trạng thái
                     if (status == 201) {
-                        Toast.makeText(RegisterActivity.this, "✅ " + message, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RegisterActivity.this, "✅ : " + message, Toast.LENGTH_SHORT).show();
+
+                        Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                        startActivity(intent);
+                        finish();
                     } else {
-                        Toast.makeText(RegisterActivity.this, "⚠ " + message, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RegisterActivity.this, "Lỗi 1: " + message, Toast.LENGTH_SHORT).show();
+                    }
+                } else if (response.errorBody() != null) {
+                    try {
+                        String errorJson = response.errorBody().string();
+                        JSONObject jsonObject = new JSONObject(errorJson);
+
+                        String message = jsonObject.has("message") ? jsonObject.getString("message") : "Đăng ký thất bại!";
+                        Toast.makeText(RegisterActivity.this, "❌ : " + message, Toast.LENGTH_LONG).show();
+                    } catch (Exception e) {
+                        Toast.makeText(RegisterActivity.this, "Lỗi 2: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(RegisterActivity.this, "Đăng ký thất bại!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterActivity.this, "Lỗi 3: Đăng ký thất bại!", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                Toast.makeText(RegisterActivity.this, "Lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(RegisterActivity.this, "Lỗi 4: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

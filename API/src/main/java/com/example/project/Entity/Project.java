@@ -2,9 +2,9 @@ package com.example.project.Entity;
 
 import com.example.project.Enum.ProjectStatus;
 import jakarta.persistence.*;
-        import lombok.*;
+import lombok.*;
 
-        import java.io.Serializable;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 

@@ -2,6 +2,7 @@ package com.example.project.Validate;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -14,15 +15,16 @@ public class GlobalExceptionHandler {
 
     // Bắt lỗi Validation
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, Object> response = new HashMap<>();
 
-        // Lấy danh sách lỗi từ validation và đưa vào Map
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage())
-        );
+        // Lấy lỗi đầu tiên
+        FieldError firstError = (FieldError) ex.getBindingResult().getAllErrors().get(0);
+        String errorMessage = firstError.getDefaultMessage();
 
-        // Trả về HTTP Status 400 Bad Request cùng với danh sách lỗi
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+        response.put("message", errorMessage);
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }

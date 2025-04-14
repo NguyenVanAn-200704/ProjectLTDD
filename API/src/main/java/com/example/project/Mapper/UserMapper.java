@@ -3,10 +3,7 @@ package com.example.project.Mapper;
 import com.example.project.Entity.User;
 import com.example.project.Request.UserRequest;
 import org.mapstruct.Mapper;
-import org.mapstruct.MapperConfig;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
@@ -16,4 +13,3 @@ public interface UserMapper {
     @Mapping(target = "tasks", ignore = true)
     User userRequestToUser(UserRequest userRequest);
 }
-
