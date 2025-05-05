@@ -2,6 +2,7 @@ package com.example.project.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import java.io.Serializable;
 import java.util.List;
@@ -29,11 +30,14 @@ public class User implements Serializable {
   String avatar;
 
   @OneToMany(mappedBy = "createBy", cascade = CascadeType.ALL)
+  @JsonManagedReference
   List<Project> projects;
 
   @OneToMany(mappedBy = "user")
+  @JsonManagedReference
   List<ProjectMember> projectMembers;
 
   @OneToMany(mappedBy = "user")
+  @JsonManagedReference
   List<Task> tasks;
 }

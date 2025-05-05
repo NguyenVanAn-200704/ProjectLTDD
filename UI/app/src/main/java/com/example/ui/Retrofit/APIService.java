@@ -20,4 +20,8 @@ public interface APIService {
 
     @POST("/project/create")
     Call<Map<String, Object>> createProject(@Body CreateProjectRequest createProjectRequest);
+
+    @GET("/project/all")
+    Call<Map<String, Object>> allProjects(@retrofit2.http.Query("id") Integer userId);
+
 }

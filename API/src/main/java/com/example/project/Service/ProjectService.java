@@ -11,6 +11,7 @@ import com.example.project.Repository.ProjectRepository;
 import com.example.project.Repository.UserRepository;
 import com.example.project.Request.ProjectRequest;
 import com.example.project.Request.UpdateProjectRequest;
+import com.example.project.Response.ProjectResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,7 +19,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +60,7 @@ public class ProjectService {
     }
   }
 
-  private void addMember(Project project, User user){
+  private void addMember(Project project, User user) {
     ProjectRole role = ProjectRole.valueOf("ADMIN");
     ProjectMember projectMember = ProjectMember.builder()
       .project(project)
@@ -96,6 +99,31 @@ public class ProjectService {
       response.put("status", HttpStatus.OK.value());
       response.put("message", "Xóa project thành công");
       return ResponseEntity.status(HttpStatus.OK).body(response);
+    } catch (Exception e) {
+      response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+      response.put("message", "Lỗi: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+  }
+
+  @Transactional
+  public ResponseEntity<Map<String, Object>> allProjects(Integer id) {
+    Map<String, Object> response = new HashMap<>();
+
+    try {
+      User user = userRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("User not found"));
+      List<Project> projects = projectRepository.findByCreateBy(user);
+      List<ProjectResponse> projectResponses = projects.stream()
+        .map(project -> new ProjectResponse(
+          project.getId(),
+          project.getName(),
+          project.getProjectMembers() != null ? project.getProjectMembers().size() : 0
+        ))
+        .collect(Collectors.toList());
+      response.put("status", HttpStatus.OK.value());
+      response.put("data", projectResponses);
+      return ResponseEntity.ok(response);
     } catch (Exception e) {
       response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
       response.put("message", "Lỗi: " + e.getMessage());

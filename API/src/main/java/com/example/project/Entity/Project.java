@@ -1,6 +1,8 @@
 package com.example.project.Entity;
 
 import com.example.project.Enum.ProjectStatus;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,6 +28,7 @@ public class Project implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "createBy", nullable = false)
+  @JsonBackReference
   User createBy;
 
   @Enumerated(EnumType.STRING)
@@ -36,9 +39,11 @@ public class Project implements Serializable {
   LocalDate createAt;
 
   @OneToMany(mappedBy = "project")
+  @JsonManagedReference
   List<ProjectMember> projectMembers;
 
   @OneToMany(mappedBy = "project")
+  @JsonManagedReference
   List<Task> tasks;
 
   @PrePersist

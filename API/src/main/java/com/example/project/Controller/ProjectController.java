@@ -30,4 +30,9 @@ public class ProjectController {
   ResponseEntity<Map<String, Object>> deleteProject(@RequestParam Integer id) {
     return projectService.deleteProject(id);
   }
+
+  @GetMapping("/all")
+  ResponseEntity<Map<String, Object>> allProject(@RequestParam Integer id) {
+    return projectService.allProjects(id);
+  }
 }

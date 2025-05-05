@@ -83,18 +83,29 @@ public class LoginActivity extends AppCompatActivity {
         stringCall.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-                if(response.isSuccessful() && response.body() != null){
+                if (response.isSuccessful() && response.body() != null) {
                     Map<String, Object> responseBody = response.body();
                     String message = responseBody.get("message").toString();
                     int status = ((Number) responseBody.get("status")).intValue();
-                    if(status == 200){
+
+                    if (status == 200) {
+                        Map<String, Object> userMap = (Map<String, Object>) responseBody.get("user");
+                        int userId = ((Number) userMap.get("id")).intValue();
+
+                        getSharedPreferences("UserPreferences", MODE_PRIVATE)
+                                .edit()
+                                .putInt("userId", userId)
+                                .apply();
+
                         Toast.makeText(LoginActivity.this, "✅ : " + message, Toast.LENGTH_SHORT).show();
-                    }
-                    else{
+
+                        Intent intent = new Intent(LoginActivity.this, HomePageActivity.class);
+                        startActivity(intent);
+                        finish();
+                    } else {
                         Toast.makeText(LoginActivity.this, "❌ : " + message, Toast.LENGTH_SHORT).show();
                     }
-                }
-                else if (response.errorBody() != null) {
+                } else if (response.errorBody() != null) {
                     try {
                         String errorJson = response.errorBody().string();
                         JSONObject jsonObject = new JSONObject(errorJson);

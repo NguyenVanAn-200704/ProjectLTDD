@@ -1,6 +1,7 @@
 package com.example.project.Entity;
 
 import com.example.project.Enum.ProjectRole;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,10 +26,12 @@ public class ProjectMember implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "projectId")
+  @JsonBackReference
   Project project;
 
   @ManyToOne
   @JoinColumn(name = "userId")
+  @JsonBackReference
   User user;
 
   @Enumerated(EnumType.STRING)

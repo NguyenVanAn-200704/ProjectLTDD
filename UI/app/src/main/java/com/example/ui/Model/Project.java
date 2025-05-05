@@ -5,9 +5,14 @@ public class Project {
     private String name;
     private int memberCount;
 
-    public Project(String name, int memberCount) {
+    public Project(Integer id, String name, int memberCount) {
+        this.id = id;
         this.name = name;
         this.memberCount = memberCount;
+    }
+
+    public Integer getId() {
+        return id;
     }
 
     public String getName() {
