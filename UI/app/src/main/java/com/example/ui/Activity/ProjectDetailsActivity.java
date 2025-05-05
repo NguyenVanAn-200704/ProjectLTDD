@@ -60,7 +60,6 @@ public class ProjectDetailsActivity extends AppCompatActivity {
         ImageButton btnTask = findViewById(R.id.btnTask);
         ImageButton btnProfile = findViewById(R.id.btnProfile);
         btnHome.setOnClickListener(v -> {
-            // Xử lý chuyển trang về Home
         });
 
         btnTask.setOnClickListener(v -> {

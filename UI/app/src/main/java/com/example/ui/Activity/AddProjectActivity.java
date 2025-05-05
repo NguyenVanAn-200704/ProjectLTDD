@@ -34,7 +34,6 @@ public class AddProjectActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_add_project);
-
         mapping();
 
         buttonAddProject.setOnClickListener(v -> {
@@ -42,12 +41,20 @@ public class AddProjectActivity extends AppCompatActivity {
                     editTextDescription.getText().toString().isEmpty()) {
                 Toast.makeText(AddProjectActivity.this, "Vui lòng nhập đầy đủ thông tin !", Toast.LENGTH_SHORT).show();
             } else {
-                createProjectRequest = new CreateProjectRequest(
-                        editTextName.getText().toString(),
-                        editTextDescription.getText().toString());
-                create();
+                int userId = getSharedPreferences("UserPreferences", MODE_PRIVATE).getInt("userId", -1);
+                if (userId == -1) {
+                    Intent intent = new Intent(AddProjectActivity.this, LoginActivity.class);
+                    startActivity(intent);
+                    finish();
+                    Toast.makeText(this, "Không tìm thấy userId. Vui lòng đăng nhập lại.", Toast.LENGTH_SHORT).show();
+                } else {
+                    createProjectRequest = new CreateProjectRequest(
+                            userId,
+                            editTextName.getText().toString(),
+                            editTextDescription.getText().toString());
+                    create();
+                }
             }
-
         });
     }
 
@@ -69,6 +76,9 @@ public class AddProjectActivity extends AppCompatActivity {
                     String message = responseBody.get("message").toString();
                     int status = ((Number) responseBody.get("status")).intValue();
                     if (status == 201) {
+                        Intent intent = new Intent(AddProjectActivity.this, HomePageActivity.class);
+                        startActivity(intent);
+                        finish();
                         Toast.makeText(AddProjectActivity.this, "✅ : " + message, Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(AddProjectActivity.this, "Lỗi 1: " + message, Toast.LENGTH_SHORT).show();

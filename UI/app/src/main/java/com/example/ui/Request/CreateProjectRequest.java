@@ -1,17 +1,22 @@
 package com.example.ui.Request;
 
 public class CreateProjectRequest {
-    private final Integer createById = 1;
+    private Integer createById;
     private String name;
     private String description;
 
-    public CreateProjectRequest(String name, String description) {
+    public CreateProjectRequest(Integer createById, String name, String description) {
+        this.createById = createById;
         this.name = name;
         this.description = description;
     }
 
     public Integer getCreateById() {
         return createById;
+    }
+
+    public void setCreateById(Integer createById) {
+        this.createById = createById;
     }
 
     public String getName() {

@@ -2,14 +2,15 @@ package com.example.ui.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.ui.Model.Project;
 import com.example.ui.Adapter.ProjectAdapter;
+import com.example.ui.Model.Project;
 import com.example.ui.R;
 import com.example.ui.Retrofit.APIService;
 import com.example.ui.Retrofit.RetrofitCilent;
@@ -23,7 +24,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class HomePageActivity extends AppCompatActivity {
-
     private LinearLayout projectListContainer;
     private List<Project> projectList;
 
@@ -31,28 +31,23 @@ public class HomePageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
-
         projectListContainer = findViewById(R.id.projectListContainer);
-
-        // Lấy userId từ SharedPreferences
-        int userId = getSharedPreferences("UserPreferences", MODE_PRIVATE)
-                .getInt("userId", -1);
-
-        if (userId != -1) {
-            fetchProjectsFromAPI(userId);
-        } else {
+        int userId = getSharedPreferences("UserPreferences", MODE_PRIVATE).getInt("userId", -1);
+        if (userId == -1) {
+            Intent intent = new Intent(HomePageActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
             Toast.makeText(this, "Không tìm thấy userId. Vui lòng đăng nhập lại.", Toast.LENGTH_SHORT).show();
-            // Có thể chuyển về LoginActivity nếu cần
+        } else {
+            fetchProjectsFromAPI(userId);
         }
-
         navigation();
     }
 
-
     private void fetchProjectsFromAPI(Integer userId) {
         APIService apiService = RetrofitCilent.getRetrofit().create(APIService.class);
-
         Call<Map<String, Object>> call = apiService.allProjects(userId);
+
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
@@ -66,8 +61,6 @@ public class HomePageActivity extends AppCompatActivity {
                         int memberCount = ((Double) item.get("memberCount")).intValue();
                         projects.add(new Project(id, name, memberCount));
                     }
-
-                    // Hiển thị ra giao diện
                     ProjectAdapter adapter = new ProjectAdapter(HomePageActivity.this, projects, projectListContainer);
                     adapter.loadProjects();
                 }
@@ -75,7 +68,6 @@ public class HomePageActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                // Xử lý lỗi kết nối
                 t.printStackTrace();
             }
         });
@@ -86,8 +78,8 @@ public class HomePageActivity extends AppCompatActivity {
         ImageButton btnHome = findViewById(R.id.btnHome);
         ImageButton btnTask = findViewById(R.id.btnTask);
         ImageButton btnProfile = findViewById(R.id.btnProfile);
+        Button btnNewProject = findViewById(R.id.btnNewProject);
         btnHome.setOnClickListener(v -> {
-            // Xử lý chuyển trang về Home
         });
 
         btnTask.setOnClickListener(v -> {
@@ -100,5 +92,9 @@ public class HomePageActivity extends AppCompatActivity {
             overridePendingTransition(0, 0);
         });
 
+        btnNewProject.setOnClickListener(v->{
+            startActivity(new Intent(this, AddProjectActivity.class));
+            finish();
+        });
     }
 }

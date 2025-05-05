@@ -61,7 +61,6 @@ public class TaskPageActivity extends AppCompatActivity {
         });
 
         btnTask.setOnClickListener(v -> {
-            //
         });
 
         btnProfile.setOnClickListener(v -> {
