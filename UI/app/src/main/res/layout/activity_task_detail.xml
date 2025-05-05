@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:background="#F7F4F0"
     android:padding="16dp"
-    tools:context=".Activity.AddTaskActivity">
+    tools:context=".Activity.TaskDetailActivity">
 
     <!-- Tiêu đề và biểu tượng -->
     <RelativeLayout
@@ -22,23 +22,23 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:text="New Task"
+            android:text="Task Name"
             android:textSize="30sp"
             android:textStyle="bold" />
 
         <Button
             android:id="@+id/btnAssign"
-            android:layout_width="129dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/imgTaskIcon"
             android:layout_alignParentEnd="true"
             android:layout_gravity="end"
-            android:layout_marginStart="85dp"
-            android:layout_marginTop="28dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="18dp"
             android:layout_marginEnd="17dp"
             android:layout_toEndOf="@+id/tvProjectTitle"
             android:backgroundTint="#E7E0DA"
-            android:text="Assign"
+            android:text="Assigned to: \n Luu Xuan Dung"
             android:textColor="#000000" />
 
         <ImageView
@@ -53,89 +53,114 @@
     <!-- Container box -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:background="#E0E0E0"
-        android:padding="16dp"
+        android:layout_height="496dp"
         android:layout_margin="16dp"
-        android:gravity="center_horizontal">
+        android:layout_weight="1"
+        android:background="#E0E0E0"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="16dp">
 
         <EditText
             android:id="@+id/edtTaskTitle"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:hint="Full Name"
+            android:layout_height="60dp"
+            android:layout_marginBottom="15dp"
             android:background="#908B89"
-            android:textColor="#FFFFFF"
+            android:hint="Full Name"
             android:padding="10dp"
-            android:textSize="16sp"
             android:text="Task Title"
-            android:layout_marginBottom="15dp" />
+            android:textSize="16sp" />
 
         <EditText
             android:id="@+id/edtTaskDecript"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:hint="Email"
-            android:background="#908B89"
-            android:textColor="#FFFFFF"
-            android:padding="10dp"
-            android:textSize="16sp"
-            android:text="Decription"
-            android:layout_marginBottom="15dp" />
-
-        <Spinner
-            android:id="@+id/spinnerTaskPriority"
-            android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:background="#908B89"
+            android:layout_height="60dp"
             android:layout_marginBottom="15dp"
+            android:background="#908B89"
+            android:hint="Email"
             android:padding="10dp"
-            android:spinnerMode="dropdown" />
+            android:text="Decription"
+            android:textSize="16sp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            tools:ignore="MissingConstraints"
+            android:layout_marginBottom="15dp">
+            <Spinner
+                android:id="@+id/spinnerTaskPriority"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginBottom="15dp"
+                android:background="#908B89"
+                android:padding="10dp"
+                android:spinnerMode="dropdown" />
+            <Spinner
+                android:id="@+id/spinnerTaskStatus"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginBottom="15dp"
+                android:layout_marginLeft="10dp"
+                android:background="#908B89"
+                android:padding="10dp"
+                android:spinnerMode="dropdown" />
+        </LinearLayout>
 
         <EditText
             android:id="@+id/edtTaskDue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Due at"
+            android:layout_marginBottom="15dp"
             android:background="#908B89"
-            android:textColor="#FFFFFF"
             android:clickable="true"
             android:focusable="false"
+            android:hint="Due at"
             android:padding="10dp"
-            android:textSize="16sp"
-            android:layout_marginBottom="15dp" />
+            android:textSize="16sp" />
 
         <!-- Nút thêm file -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
+
             <Button
                 android:id="@+id/btnAddFile"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="2"
                 android:layout_gravity="left"
-                android:text="Upload"
-                android:layout_marginTop="10dp" />
+                android:layout_marginTop="10dp"
+                android:layout_weight="2"
+                android:text="Upload" />
+
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="30dp"
-                android:layout_weight="3"
-                android:background="#908B89"
                 android:layout_marginLeft="10dp"
-                android:layout_marginTop="10dp"/>
+                android:layout_marginTop="10dp"
+                android:layout_weight="3"
+                android:background="#908B89" />
 
         </LinearLayout>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="10dp"
+            android:layout_weight="3"
+            android:text="created on: 3/3/2025" />
+
         <Button
-            android:id="@+id/buttonAddProject"
+            android:id="@+id/btnEdit"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
-            android:text="Add" />
+            android:text="Save" />
 
     </LinearLayout>
 
