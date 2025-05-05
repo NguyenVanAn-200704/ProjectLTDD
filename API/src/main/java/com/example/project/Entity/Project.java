@@ -15,35 +15,35 @@ import java.util.List;
 @Setter
 @Builder
 public class Project implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  Integer id;
 
-    @Column(nullable = false)
-    String name;
+  @Column(nullable = false)
+  String name;
 
-    String description;
+  String description;
 
-    @ManyToOne
-    @JoinColumn(name = "createBy", nullable = false)
-    User createBy;
+  @ManyToOne
+  @JoinColumn(name = "createBy", nullable = false)
+  User createBy;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    ProjectStatus status;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  ProjectStatus status;
 
-    @Column(nullable = false)
-    LocalDate createAt;
+  @Column(nullable = false)
+  LocalDate createAt;
 
-    @OneToMany(mappedBy = "project")
-    List<ProjectMember> projectMembers;
+  @OneToMany(mappedBy = "project")
+  List<ProjectMember> projectMembers;
 
-    @OneToMany(mappedBy = "project")
-    List<Task> tasks;
+  @OneToMany(mappedBy = "project")
+  List<Task> tasks;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createAt = LocalDate.now();
-        this.status = ProjectStatus.ACTIVE;
-    }
+  @PrePersist
+  protected void onCreate() {
+    this.createAt = LocalDate.now();
+    this.status = ProjectStatus.ACTIVE;
+  }
 }

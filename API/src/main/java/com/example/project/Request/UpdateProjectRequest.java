@@ -5,12 +5,12 @@ import lombok.Data;
 
 @Data
 public class UpdateProjectRequest {
-    private Integer id;
+  private Integer id;
 
-    @NotBlank(message = "Name không được để trống !")
-    private String name;
+  @NotBlank(message = "Name không được để trống !")
+  private String name;
 
-    private String description;
+  private String description;
 
-    private String status;
+  private String status;
 }

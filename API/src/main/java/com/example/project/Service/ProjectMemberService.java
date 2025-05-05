@@ -4,13 +4,11 @@ import com.example.project.Entity.Project;
 import com.example.project.Entity.ProjectMember;
 import com.example.project.Entity.User;
 import com.example.project.Enum.ProjectRole;
-import com.example.project.Mapper.ProjectMapper;
-import com.example.project.Mapper.UpdateProjectMapper;
 import com.example.project.Repository.ProjectMemberRepository;
 import com.example.project.Repository.ProjectRepository;
 import com.example.project.Repository.UserRepository;
-import com.example.project.Request.ProjectRequest;
-import com.example.project.Request.UpdateProjectRequest;
+import com.example.project.Request.ProjectMemberRequest;
+import com.example.project.Request.UpdateProjectMemberRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,36 +17,38 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class ProjectService {
+public class ProjectMemberService {
+  private final ProjectMemberRepository projectMemberRepository;
   private final ProjectRepository projectRepository;
   private final UserRepository userRepository;
-  private final ProjectMapper projectMapper;
-  private final UpdateProjectMapper updateProjectMapper;
-  private final ProjectMemberRepository projectMemberRepository;
 
   @Transactional
-  public ResponseEntity<Map<String, Object>> createProject(ProjectRequest projectRequest) {
+  public ResponseEntity<Map<String, Object>> addProjectMember(ProjectMemberRequest projectMemberRequest) {
     Map<String, Object> response = new HashMap<>();
-
     try {
-      User user = userRepository.findById(projectRequest.getCreateById())
-        .orElseThrow(() -> new RuntimeException("User not found"));
-      if (projectRepository.existsByNameAndCreateBy(projectRequest.getName(), user)) {
-        response.put("status", HttpStatus.CONFLICT.value());
-        response.put("message", "Project đã trùng tên !");
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+      Project project = projectRepository.findById(projectMemberRequest.getProjectId()).orElseThrow(
+        () -> new RuntimeException("Project not found"));
+      User user = userRepository.findByEmail(projectMemberRequest.getEmail()).orElseThrow(
+        () -> new RuntimeException("User not found"));
+      Optional<ProjectMember> existing = projectMemberRepository.findByProjectAndUser(project, user);
+      if (existing.isPresent()) {
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+        response.put("message", "Người dùng đã là thành viên của project này");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
       }
-      Project project = projectMapper.projectRequestToProject(projectRequest);
-      project.setCreateBy(user);
-      projectRepository.save(project);
-
-      addMember(project, user);
-
+      ProjectRole role = ProjectRole.valueOf(projectMemberRequest.getRole().toUpperCase());
+      ProjectMember projectMember = ProjectMember.builder()
+        .project(project)
+        .user(user)
+        .role(role)
+        .build();
+      projectMemberRepository.save(projectMember);
       response.put("status", HttpStatus.CREATED.value());
-      response.put("message", "Tạo project thành công");
+      response.put("message", "Thêm thành viên thành công");
       return ResponseEntity.status(HttpStatus.CREATED).body(response);
     } catch (Exception e) {
       response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -57,28 +57,17 @@ public class ProjectService {
     }
   }
 
-  private void addMember(Project project, User user){
-    ProjectRole role = ProjectRole.valueOf("ADMIN");
-    ProjectMember projectMember = ProjectMember.builder()
-      .project(project)
-      .user(user)
-      .role(role)
-      .build();
-    projectMemberRepository.save(projectMember);
-  }
-
   @Transactional
-  public ResponseEntity<Map<String, Object>> updateProject(UpdateProjectRequest updateProjectRequest) {
+  public ResponseEntity<Map<String, Object>> updateProjectMember(UpdateProjectMemberRequest updateProjectMemberRequest) {
     Map<String, Object> response = new HashMap<>();
-
     try {
-      Project project = projectRepository.findById(updateProjectRequest.getId())
-        .orElseThrow(() ->
-          new RuntimeException("Project not found with id: " + updateProjectRequest.getId()));
-      updateProjectMapper.updateProjectFromRequest(updateProjectRequest, project);
-      projectRepository.save(project);
+      ProjectMember projectMember = projectMemberRepository.findById(updateProjectMemberRequest.getId()).orElseThrow(
+        () -> new RuntimeException("Project not found: " + updateProjectMemberRequest.getId())
+      );
+      projectMember.setRole(ProjectRole.valueOf(updateProjectMemberRequest.getRole().toUpperCase()));
+      projectMemberRepository.save(projectMember);
       response.put("status", HttpStatus.OK.value());
-      response.put("message", "Cập nhật project thành công");
+      response.put("message", "Cập nhật project-member thành công");
       return ResponseEntity.status(HttpStatus.OK).body(response);
     } catch (Exception e) {
       response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -88,13 +77,12 @@ public class ProjectService {
   }
 
   @Transactional
-  public ResponseEntity<Map<String, Object>> deleteProject(Integer id) {
+  public ResponseEntity<Map<String, Object>> deleteProjectMember(Integer id) {
     Map<String, Object> response = new HashMap<>();
-
     try {
-      projectRepository.deleteById(id);
+      projectMemberRepository.deleteById(id);
       response.put("status", HttpStatus.OK.value());
-      response.put("message", "Xóa project thành công");
+      response.put("message", "Xóa project-member thành công");
       return ResponseEntity.status(HttpStatus.OK).body(response);
     } catch (Exception e) {
       response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());

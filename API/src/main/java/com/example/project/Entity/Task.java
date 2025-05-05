@@ -15,37 +15,37 @@ import java.time.LocalDate;
 @Setter
 @Builder
 public class Task implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  Integer id;
 
-    @Column(nullable = false)
-    String title;
+  @Column(nullable = false)
+  String title;
 
-    String description;
+  String description;
 
-    @Enumerated(EnumType.STRING)
-    TaskStatus status;
+  @Enumerated(EnumType.STRING)
+  TaskStatus status;
 
-    @Enumerated(EnumType.STRING)
-    TaskPriority priority;
+  @Enumerated(EnumType.STRING)
+  TaskPriority priority;
 
-    @ManyToOne
-    @JoinColumn(name = "projectId", nullable = false)
-    Project project;
+  @ManyToOne
+  @JoinColumn(name = "projectId", nullable = false)
+  Project project;
 
-    @ManyToOne
-    @JoinColumn(name = "assignId")
-    User user;
+  @ManyToOne
+  @JoinColumn(name = "assignId")
+  User user;
 
-    @Column(nullable = false)
-    LocalDate dueDate;
+  @Column(nullable = false)
+  LocalDate dueDate;
 
-    LocalDate createdDate;
+  LocalDate createdDate;
 
-    @PrePersist
-    protected void onCreate() {
-        this.status = TaskStatus.TO_DO;
-        this.createdDate = LocalDate.now();
-    }
+  @PrePersist
+  protected void onCreate() {
+    this.status = TaskStatus.TO_DO;
+    this.createdDate = LocalDate.now();
+  }
 }

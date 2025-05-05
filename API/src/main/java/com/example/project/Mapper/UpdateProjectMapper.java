@@ -8,10 +8,10 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface UpdateProjectMapper {
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createBy", ignore = true)
-    @Mapping(target = "projectMembers", ignore = true)
-    @Mapping(target = "tasks", ignore = true)
-    @Mapping(target = "createAt", ignore = true)
-    void updateProjectFromRequest(UpdateProjectRequest updateProjectRequest, @MappingTarget Project project);
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "createBy", ignore = true)
+  @Mapping(target = "projectMembers", ignore = true)
+  @Mapping(target = "tasks", ignore = true)
+  @Mapping(target = "createAt", ignore = true)
+  void updateProjectFromRequest(UpdateProjectRequest updateProjectRequest, @MappingTarget Project project);
 }

@@ -13,18 +13,18 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Bắt lỗi Validation
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, Object> response = new HashMap<>();
+  // Bắt lỗi Validation
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    Map<String, Object> response = new HashMap<>();
 
-        // Lấy lỗi đầu tiên
-        FieldError firstError = (FieldError) ex.getBindingResult().getAllErrors().get(0);
-        String errorMessage = firstError.getDefaultMessage();
+    // Lấy lỗi đầu tiên
+    FieldError firstError = (FieldError) ex.getBindingResult().getAllErrors().get(0);
+    String errorMessage = firstError.getDefaultMessage();
 
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("message", errorMessage);
+    response.put("status", HttpStatus.BAD_REQUEST.value());
+    response.put("message", errorMessage);
 
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-    }
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
 }

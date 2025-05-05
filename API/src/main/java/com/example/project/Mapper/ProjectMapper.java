@@ -7,11 +7,11 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface ProjectMapper {
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createBy", ignore = true)
-    @Mapping(target = "projectMembers", ignore = true)
-    @Mapping(target = "tasks", ignore = true)
-    @Mapping(target = "createAt", ignore = true)
-    @Mapping(target = "status", ignore = true)
-    Project projectRequestToProject(ProjectRequest projectRequest);
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "createBy", ignore = true)
+  @Mapping(target = "projectMembers", ignore = true)
+  @Mapping(target = "tasks", ignore = true)
+  @Mapping(target = "createAt", ignore = true)
+  @Mapping(target = "status", ignore = true)
+  Project projectRequestToProject(ProjectRequest projectRequest);
 }

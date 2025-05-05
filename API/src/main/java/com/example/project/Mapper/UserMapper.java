@@ -7,9 +7,9 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "projects", ignore = true)
-    @Mapping(target = "projectMembers", ignore = true)
-    @Mapping(target = "tasks", ignore = true)
-    User userRequestToUser(UserRequest userRequest);
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "projects", ignore = true)
+  @Mapping(target = "projectMembers", ignore = true)
+  @Mapping(target = "tasks", ignore = true)
+  User userRequestToUser(UserRequest userRequest);
 }

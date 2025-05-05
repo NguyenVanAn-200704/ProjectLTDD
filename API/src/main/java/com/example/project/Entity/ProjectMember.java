@@ -13,28 +13,33 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Builder
+@Table(
+  uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"projectId", "userId"})
+  }
+)
 public class ProjectMember implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "projectId")
-    Project project;
+  @ManyToOne
+  @JoinColumn(name = "projectId")
+  Project project;
 
-    @ManyToOne
-    @JoinColumn(name = "userId")
-    User user;
+  @ManyToOne
+  @JoinColumn(name = "userId")
+  User user;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    ProjectRole role;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  ProjectRole role;
 
-    @Column(nullable = false)
-    LocalDate joinDate;
+  @Column(nullable = false)
+  LocalDate joinDate;
 
-    @PrePersist
-    protected void onCreate() {
-        this.joinDate = LocalDate.now();
-    }
+  @PrePersist
+  protected void onCreate() {
+    this.joinDate = LocalDate.now();
+  }
 }
