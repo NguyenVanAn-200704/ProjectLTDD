@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F7F4F0"
+    android:padding="16dp"
+    tools:context=".Activity.MemberActivity">
+
+    <!-- Tiêu đề và biểu tượng -->
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="117dp"
+        android:paddingStart="16dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:id="@+id/tvProjectTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Project Name"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/imgTaskIcon"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="14dp"
+            android:src="@drawable/ic_logo" />
+    </RelativeLayout>
+
+    <!-- Thanh tìm kiếm -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#D9D9D9"
+        android:padding="4dp"
+        android:layout_marginBottom="12dp"
+        android:gravity="center_vertical">
+
+        <EditText
+            android:id="@+id/edtSearchTask"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:layout_height="40dp"
+            android:hint="New member"
+            android:background="#F6F1F1"
+            android:paddingStart="8dp"
+            android:inputType="text" />
+        <Spinner
+            android:id="@+id/spinnerMemberRole"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+             android:backgroundTint="#E7E0DA"
+            android:layout_marginLeft="5dp"
+            android:background="@drawable/bg_project_container"
+            android:spinnerMode="dropdown" />
+
+        <Button
+            android:id="@+id/btnNewProject"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginLeft="5dp"
+            android:text="Add"/>
+
+    </LinearLayout>
+
+    <!-- Danh sách Task -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:layout_marginTop="4dp"
+        android:backgroundTint="#D9D9D9"
+        android:clipToPadding="false"
+        android:elevation="2dp"
+        android:gravity="center"
+        android:background="@drawable/bg_project_container">
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:scrollbars="horizontal">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <!-- Header hàng cột -->
+
+                <!-- RecyclerView -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerTasks"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:overScrollMode="never"
+                    android:scrollbars="none"/>
+            </LinearLayout>
+        </HorizontalScrollView>
+    </LinearLayout>
+
+    <!-- Bottom Navigation -->
+    <include
+        android:layout_marginTop="20dp"
+        layout="@layout/item_bottom_nav"
+        android:layout_width="match_parent"
+        android:layout_height="64dp" />
+</LinearLayout>

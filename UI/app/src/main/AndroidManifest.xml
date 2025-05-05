@@ -17,7 +17,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.UI"
         tools:targetApi="31">
+        <activity
+            android:name=".Activity.MemberActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activity.TaskDetailActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".Activity.ProjectDetailsActivity"
             android:exported="true">
@@ -26,7 +37,8 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity><activity
+        </activity>
+        <activity
             android:name=".Activity.AddTaskActivity"
             android:exported="true">
             <intent-filter>
@@ -34,7 +46,8 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity><activity
+        </activity>
+        <activity
             android:name=".Activity.AddProjectActivity"
             android:exported="true">
             <intent-filter>
