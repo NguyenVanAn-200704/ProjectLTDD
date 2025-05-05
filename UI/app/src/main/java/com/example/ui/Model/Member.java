@@ -1,4 +1,4 @@
-package com.example.ui.Request;
+package com.example.ui.Model;
 
 public class Member {
     private String email;
