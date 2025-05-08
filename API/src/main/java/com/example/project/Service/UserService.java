@@ -1,7 +1,9 @@
 package com.example.project.Service;
 
+import com.example.project.Entity.Task;
 import com.example.project.Entity.User;
 import com.example.project.Mapper.UserMapper;
+import com.example.project.Repository.TaskRepository;
 import com.example.project.Repository.UserRepository;
 import com.example.project.Request.LoginRequest;
 import com.example.project.Request.UserRequest;
@@ -12,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -19,6 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService {
   private final UserRepository userRepository;
+  private final TaskRepository taskRepository;
   private final UserMapper userMapper;
 
   @Transactional
@@ -66,5 +70,23 @@ public class UserService {
     response.put("message", "Đăng nhập thành công");
     response.put("user", user);
     return ResponseEntity.status(HttpStatus.OK).body(response);
+  }
+
+  @Transactional
+  public ResponseEntity<Map<String, Object>> allTasksInUser(Integer userId) {
+    Map<String, Object> response = new HashMap<>();
+
+    try {
+      User user = userRepository.findById(userId)
+        .orElseThrow(() -> new RuntimeException("User not found!"));
+      List<Task> tasks = taskRepository.findByUser(user);
+      response.put("status", HttpStatus.OK.value());
+      response.put("tasks", tasks);
+      return ResponseEntity.status(HttpStatus.OK).body(response);
+    } catch (Exception e) {
+      response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+      response.put("message", "Lỗi: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
   }
 }

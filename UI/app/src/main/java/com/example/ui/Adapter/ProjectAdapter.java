@@ -1,11 +1,18 @@
 package com.example.ui.Adapter;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.ui.Activity.HomePageActivity;
+import com.example.ui.Activity.LoginActivity;
+import com.example.ui.Activity.ProjectDetailsActivity;
 import com.example.ui.Model.Project;
 import com.example.ui.R;
 
@@ -36,6 +43,15 @@ public class ProjectAdapter {
             tvName.setText(project.getName());
             tvMember.setText(project.getMemberCount() + " members");
 
+            itemView.setOnClickListener(v->{
+                int projectId = project.getId();
+                context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
+                        .edit()
+                        .putInt("projectId", projectId)
+                        .apply();
+                Intent intent = new Intent(context, ProjectDetailsActivity.class);
+                context.startActivity(intent);
+            });
             container.addView(itemView);
         }
     }

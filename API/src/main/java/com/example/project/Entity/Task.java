@@ -3,6 +3,7 @@ package com.example.project.Entity;
 import com.example.project.Enum.TaskPriority;
 import com.example.project.Enum.TaskStatus;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -38,7 +39,7 @@ public class Task implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "assignId")
-  @JsonBackReference
+  @JsonManagedReference
   User user;
 
   @Column(nullable = false)

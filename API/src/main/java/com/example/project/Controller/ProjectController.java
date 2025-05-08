@@ -35,4 +35,9 @@ public class ProjectController {
   ResponseEntity<Map<String, Object>> allProject(@RequestParam Integer id) {
     return projectService.allProjects(id);
   }
+
+  @GetMapping("/task/all")
+  ResponseEntity<Map<String, Object>> allTasksInProject(@RequestParam Integer id) {
+    return projectService.allTasksInProject(id);
+  }
 }

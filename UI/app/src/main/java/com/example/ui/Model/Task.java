@@ -21,6 +21,14 @@ public class Task {
         this.title = title;
     }
 
+    public Task(Integer id, String title, String status, User user, LocalDate dueDate){
+        this.id = id;
+        this.title = title;
+        this.status = status;
+        this.user = user;
+        this.dueDate = dueDate;
+    }
+
     public String getTitle() {
         return title;
     }

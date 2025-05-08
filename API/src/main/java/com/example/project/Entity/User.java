@@ -1,5 +1,6 @@
 package com.example.project.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -29,15 +30,15 @@ public class User implements Serializable {
 
   String avatar;
 
-  @OneToMany(mappedBy = "createBy", cascade = CascadeType.ALL)
-  @JsonManagedReference
+  @OneToMany(mappedBy = "createBy", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @JsonIgnore
   List<Project> projects;
 
-  @OneToMany(mappedBy = "user")
-  @JsonManagedReference
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+  @JsonIgnore
   List<ProjectMember> projectMembers;
 
-  @OneToMany(mappedBy = "user")
-  @JsonManagedReference
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+  @JsonIgnore
   List<Task> tasks;
 }

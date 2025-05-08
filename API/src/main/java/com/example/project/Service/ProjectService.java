@@ -2,16 +2,19 @@ package com.example.project.Service;
 
 import com.example.project.Entity.Project;
 import com.example.project.Entity.ProjectMember;
+import com.example.project.Entity.Task;
 import com.example.project.Entity.User;
 import com.example.project.Enum.ProjectRole;
 import com.example.project.Mapper.ProjectMapper;
 import com.example.project.Mapper.UpdateProjectMapper;
 import com.example.project.Repository.ProjectMemberRepository;
 import com.example.project.Repository.ProjectRepository;
+import com.example.project.Repository.TaskRepository;
 import com.example.project.Repository.UserRepository;
 import com.example.project.Request.ProjectRequest;
 import com.example.project.Request.UpdateProjectRequest;
 import com.example.project.Response.ProjectResponse;
+import com.example.project.Response.TaskResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,10 +30,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProjectService {
   private final ProjectRepository projectRepository;
+  private final ProjectMemberRepository projectMemberRepository;
+  private final TaskRepository taskRepository;
   private final UserRepository userRepository;
   private final ProjectMapper projectMapper;
   private final UpdateProjectMapper updateProjectMapper;
-  private final ProjectMemberRepository projectMemberRepository;
 
   @Transactional
   public ResponseEntity<Map<String, Object>> createProject(ProjectRequest projectRequest) {
@@ -123,6 +127,24 @@ public class ProjectService {
         .collect(Collectors.toList());
       response.put("status", HttpStatus.OK.value());
       response.put("data", projectResponses);
+      return ResponseEntity.ok(response);
+    } catch (Exception e) {
+      response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+      response.put("message", "Lỗi: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+  }
+
+  @Transactional
+  public ResponseEntity<Map<String, Object>> allTasksInProject(Integer id) {
+    Map<String, Object> response = new HashMap<>();
+
+    try{
+      Project project = projectRepository.findById(id)
+        .orElseThrow(()-> new RuntimeException("Project not found: " + id));
+      List<Task> tasks = taskRepository.findByProject(project);
+      response.put("status", HttpStatus.OK.value());
+      response.put("tasks", tasks);
       return ResponseEntity.ok(response);
     } catch (Exception e) {
       response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());

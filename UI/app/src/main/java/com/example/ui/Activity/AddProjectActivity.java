@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -56,6 +57,7 @@ public class AddProjectActivity extends AppCompatActivity {
                 }
             }
         });
+        navigation();
     }
 
     private void mapping() {
@@ -102,6 +104,26 @@ public class AddProjectActivity extends AppCompatActivity {
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
                 Toast.makeText(AddProjectActivity.this, "Lỗi 4: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
+        });
+    }
+
+    void navigation(){
+        ImageButton btnHome = findViewById(R.id.btnHome);
+        ImageButton btnTask = findViewById(R.id.btnTask);
+        ImageButton btnProfile = findViewById(R.id.btnProfile);
+        btnHome.setOnClickListener(v -> {
+            startActivity(new Intent(this, HomePageActivity.class));
+            overridePendingTransition(0, 0);
+        });
+
+        btnTask.setOnClickListener(v -> {
+            startActivity(new Intent(this, TaskPageActivity.class));
+            overridePendingTransition(0, 0);
+        });
+
+        btnProfile.setOnClickListener(v -> {
+            startActivity(new Intent(this, ProfileActivity.class));
+            overridePendingTransition(0, 0);
         });
     }
 }

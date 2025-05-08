@@ -24,4 +24,9 @@ public interface APIService {
     @GET("/project/all")
     Call<Map<String, Object>> allProjects(@retrofit2.http.Query("id") Integer userId);
 
+    @GET("/project/task/all")
+    Call<Map<String, Object>> allTasksInProject(@retrofit2.http.Query("id") Integer projectId);
+
+    @GET("/user/task/all")
+    Call<Map<String, Object>> allTasksInUser(@retrofit2.http.Query("id") Integer userId);
 }
