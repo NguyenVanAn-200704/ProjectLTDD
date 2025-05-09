@@ -1,4 +1,4 @@
-package com.example.ui;
+package com.example.ui.Adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.ui.Model.Member;
+import com.example.ui.R;
 
 import java.util.List;
 
