@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.ui.Adapter.ProjectAdapter;
 import com.example.ui.Model.Project;
 import com.example.ui.R;
+import com.example.ui.Request.UpdateUserRequest;
 import com.example.ui.Retrofit.APIService;
 import com.example.ui.Retrofit.RetrofitCilent;
 import com.example.ui.Upload.UploadAvatar;
@@ -156,7 +157,40 @@ public class ProfileActivity extends AppCompatActivity {
         }).execute();
     }
 
-    void updateUser(){
+    void updateUser() {
+        int userId = getSharedPreferences("UserPreferences", MODE_PRIVATE).getInt("userId", -1);
+        if (userId == -1) {
+            Toast.makeText(this, "Không tìm thấy userId. Vui lòng đăng nhập lại.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
+        String fullName = edtFullName.getText().toString();
+        String email = edtEmail.getText().toString();
+
+        if (fullName.isEmpty() || email.isEmpty()) {
+            Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        UpdateUserRequest updateUserRequest = new UpdateUserRequest(userId, fullName, email);
+        APIService apiService = RetrofitCilent.getRetrofit().create(APIService.class);
+        Call<Map<String, Object>> call = apiService.updateUser(updateUserRequest);
+
+        call.enqueue(new Callback<Map<String, Object>>() {
+            @Override
+            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    String message = response.body().get("message").toString();
+                    Toast.makeText(ProfileActivity.this, "✅ " + message, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(ProfileActivity.this, "❌ Cập nhật thất bại!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                Toast.makeText(ProfileActivity.this, "Lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

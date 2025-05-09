@@ -2,6 +2,7 @@ package com.example.ui.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -123,7 +124,14 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
                 Toast.makeText(LoginActivity.this, "Lỗi 2: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+
+                // In lỗi ra Logcat (sẽ hiện trong Tomcat nếu bạn khởi chạy qua Android Studio console)
+                Log.e("RetrofitFailure", "Lỗi khi gọi API đăng nhập", t);
+
+                // Hoặc in trực tiếp ra console:
+                t.printStackTrace();  // cái này cũng hiện trên log hoặc terminal Tomcat nếu bạn capture log từ thiết bị
             }
+
         });
     }
 }

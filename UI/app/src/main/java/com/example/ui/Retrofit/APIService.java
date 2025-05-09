@@ -2,6 +2,7 @@ package com.example.ui.Retrofit;
 
 import com.example.ui.Request.CreateProjectRequest;
 import com.example.ui.Request.LoginRequest;
+import com.example.ui.Request.UpdateUserRequest;
 import com.example.ui.Request.UserRequest;
 
 import java.util.Map;
@@ -10,6 +11,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 
 public interface APIService {
     @POST("/user/create")
@@ -20,6 +22,9 @@ public interface APIService {
 
     @POST("/project/create")
     Call<Map<String, Object>> createProject(@Body CreateProjectRequest createProjectRequest);
+
+    @PUT("/user/update")
+    Call<Map<String, Object>> updateUser(@Body UpdateUserRequest updateUserRequest);
 
     @GET("/project/all")
     Call<Map<String, Object>> allProjects(@retrofit2.http.Query("id") Integer userId);
