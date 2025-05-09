@@ -2,10 +2,12 @@ package com.example.project.Service;
 
 import com.example.project.Entity.Task;
 import com.example.project.Entity.User;
+import com.example.project.Mapper.UpdateUserMapper;
 import com.example.project.Mapper.UserMapper;
 import com.example.project.Repository.TaskRepository;
 import com.example.project.Repository.UserRepository;
 import com.example.project.Request.LoginRequest;
+import com.example.project.Request.UpdateUserRequest;
 import com.example.project.Request.UserRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class UserService {
   private final UserRepository userRepository;
   private final TaskRepository taskRepository;
   private final UserMapper userMapper;
+  private final UpdateUserMapper updateUserMapper;
 
   @Transactional
   public ResponseEntity<Map<String, Object>> createUser(UserRequest userRequest) {
@@ -43,6 +46,33 @@ public class UserService {
     } catch (Exception e) {
       response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
       response.put("message", "Lỗi: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+  }
+
+  @Transactional
+  public ResponseEntity<Map<String, Object>> updateUser(UpdateUserRequest updateUserRequest) {
+    Map<String, Object> response = new HashMap<>();
+
+    try {
+      Optional<User> optionalUser = userRepository.findById(updateUserRequest.getId());
+      if (optionalUser.isEmpty()) {
+        response.put("status", HttpStatus.NOT_FOUND.value());
+        response.put("message", "Người dùng không tồn tại");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+      }
+
+      User user = optionalUser.get();
+      updateUserMapper.updateUserFromProfile(updateUserRequest, user);
+      userRepository.save(user);
+
+      response.put("status", HttpStatus.OK.value());
+      response.put("message", "Cập nhật hồ sơ thành công");
+      response.put("user", user);
+      return ResponseEntity.ok(response);
+    } catch (Exception e) {
+      response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+      response.put("message", "Lỗi khi cập nhật hồ sơ: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
   }
@@ -86,6 +116,23 @@ public class UserService {
     } catch (Exception e) {
       response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
       response.put("message", "Lỗi: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+  }
+
+  @Transactional
+  public ResponseEntity<Map<String, Object>> profile(Integer userId) {
+    Map<String, Object> response = new HashMap<>();
+
+    try {
+      User user = userRepository.findById(userId)
+        .orElseThrow(() -> new RuntimeException("User not found!"));
+      response.put("status", HttpStatus.OK.value());
+      response.put("user", user);
+      return ResponseEntity.status(HttpStatus.OK).body(response);
+    } catch (Exception e) {
+      response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+      response.put("message", "Lỗi profileUser: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
   }

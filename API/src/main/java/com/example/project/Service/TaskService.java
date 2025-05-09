@@ -5,6 +5,7 @@ import com.example.project.Entity.Task;
 import com.example.project.Entity.User;
 import com.example.project.Mapper.TaskMapper;
 import com.example.project.Mapper.UpdateTaskMapper;
+import com.example.project.Repository.ProjectMemberRepository;
 import com.example.project.Repository.ProjectRepository;
 import com.example.project.Repository.TaskRepository;
 import com.example.project.Repository.UserRepository;
@@ -17,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -26,9 +26,42 @@ public class TaskService {
   private final TaskRepository taskRepository;
   private final ProjectRepository projectRepository;
   private final UserRepository userRepository;
+  private final ProjectMemberRepository projectMemberRepository;
   private final TaskMapper taskMapper;
   private final UpdateTaskMapper updateTaskMapper;
 
+  //  @Transactional
+//  public ResponseEntity<Map<String, Object>> addTask(TaskRequest taskRequest) {
+//    Map<String, Object> response = new HashMap<>();
+//    try {
+//      Project project = projectRepository.findById(taskRequest.getProjectId())
+//        .orElseThrow(() -> new RuntimeException("Project not found !"));
+//
+//      User user = userRepository.findById(taskRequest.getUserId())
+//        .orElseThrow(() -> new RuntimeException("User not found !"));
+//
+//      boolean existsTaskWithSameTitle = taskRepository.existsByProjectAndTitle(project, taskRequest.getTitle());
+//      if (existsTaskWithSameTitle) {
+//        response.put("status", HttpStatus.BAD_REQUEST.value());
+//        response.put("message", "Title này đã tồn tại trong Project !");
+//        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+//      }
+//
+//      Task task = taskMapper.taskRequestToTask(taskRequest);
+//      task.setProject(project);
+//      task.setUser(user);
+//      taskRepository.save(task);
+//
+//      response.put("status", HttpStatus.CREATED.value());
+//      response.put("message", "Tạo task thành công");
+//      return new ResponseEntity<>(response, HttpStatus.CREATED);
+//
+//    } catch (Exception e) {
+//      response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+//      response.put("message", "Lỗi add task: " + e.getMessage());
+//      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+//    }
+//  }
   @Transactional
   public ResponseEntity<Map<String, Object>> addTask(TaskRequest taskRequest) {
     Map<String, Object> response = new HashMap<>();
@@ -36,9 +69,7 @@ public class TaskService {
       Project project = projectRepository.findById(taskRequest.getProjectId())
         .orElseThrow(() -> new RuntimeException("Project not found !"));
 
-      User user = userRepository.findById(taskRequest.getUserId())
-        .orElseThrow(() -> new RuntimeException("User not found !"));
-
+      // Kiểm tra tiêu đề trùng
       boolean existsTaskWithSameTitle = taskRepository.existsByProjectAndTitle(project, taskRequest.getTitle());
       if (existsTaskWithSameTitle) {
         response.put("status", HttpStatus.BAD_REQUEST.value());
@@ -48,7 +79,25 @@ public class TaskService {
 
       Task task = taskMapper.taskRequestToTask(taskRequest);
       task.setProject(project);
-      task.setUser(user);
+
+      // Nếu userId không null thì xử lý tiếp
+      if (taskRequest.getUserId() != null) {
+        User user = userRepository.findById(taskRequest.getUserId())
+          .orElseThrow(() -> new RuntimeException("User not found !"));
+
+        boolean isProjectMember = projectMemberRepository
+          .existsByProjectIdAndUserId(project.getId(), user.getId());
+        if (!isProjectMember) {
+          response.put("status", HttpStatus.BAD_REQUEST.value());
+          response.put("message", "Người dùng không phải là thành viên của Project !");
+          return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        task.setUser(user); // Gán user nếu hợp lệ
+      } else {
+        task.setUser(null); // Gán null nếu không có user
+      }
+
       taskRepository.save(task);
 
       response.put("status", HttpStatus.CREATED.value());

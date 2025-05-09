@@ -29,4 +29,7 @@ public interface APIService {
 
     @GET("/user/task/all")
     Call<Map<String, Object>> allTasksInUser(@retrofit2.http.Query("id") Integer userId);
+
+    @GET("/user/profile")
+    Call<Map<String, Object>> profile(@retrofit2.http.Query("id") Integer userId);
 }

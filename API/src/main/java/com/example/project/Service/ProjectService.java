@@ -14,7 +14,6 @@ import com.example.project.Repository.UserRepository;
 import com.example.project.Request.ProjectRequest;
 import com.example.project.Request.UpdateProjectRequest;
 import com.example.project.Response.ProjectResponse;
-import com.example.project.Response.TaskResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

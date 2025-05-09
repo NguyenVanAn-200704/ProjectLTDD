@@ -1,6 +1,7 @@
 package com.example.project.Controller;
 
 import com.example.project.Request.LoginRequest;
+import com.example.project.Request.UpdateUserRequest;
 import com.example.project.Request.UserRequest;
 import com.example.project.Service.UserService;
 import jakarta.validation.Valid;
@@ -21,6 +22,11 @@ public class UserController {
     return userService.createUser(userRequest);
   }
 
+  @PutMapping("/update")
+  ResponseEntity<Map<String, Object>> updateUser(@Valid @RequestBody UpdateUserRequest updateUserRequest) {
+    return userService.updateUser(updateUserRequest);
+  }
+
   @PostMapping("/login")
   ResponseEntity<Map<String, Object>> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
     return userService.login(loginRequest);
@@ -29,5 +35,10 @@ public class UserController {
   @GetMapping("/task/all")
   ResponseEntity<Map<String, Object>> taskAll(@RequestParam Integer id) {
     return userService.allTasksInUser(id);
+  }
+
+  @GetMapping("/profile")
+  ResponseEntity<Map<String, Object>> profile(@RequestParam Integer id) {
+    return userService.profile(id);
   }
 }
