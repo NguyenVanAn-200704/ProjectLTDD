@@ -136,4 +136,29 @@ public class UserService {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
   }
+
+  @Transactional
+  public ResponseEntity<Map<String, Object>> checkUserByEmail(String email) {
+    Map<String, Object> response = new HashMap<>();
+
+    try {
+      User user = userRepository.findByEmail(email)
+              .orElseThrow(() -> new RuntimeException("User not found!"));
+
+      Map<String, Object> data = new HashMap<>();
+      data.put("email", user.getEmail());
+      data.put("avatar", user.getAvatar()); // Giả sử User có phương thức getAvatar()
+
+      response.put("status", HttpStatus.OK.value());
+      response.put("message", "User found");
+      response.put("data", data);
+
+      return ResponseEntity.status(HttpStatus.OK).body(response);
+    } catch (Exception e) {
+      response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+      response.put("message", "Lỗi profileUser: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+  }
+
 }

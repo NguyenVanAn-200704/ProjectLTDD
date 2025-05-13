@@ -16,8 +16,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -83,6 +85,30 @@ public class ProjectMemberService {
       projectMemberRepository.deleteById(id);
       response.put("status", HttpStatus.OK.value());
       response.put("message", "Xóa project-member thành công");
+      return ResponseEntity.status(HttpStatus.OK).body(response);
+    } catch (Exception e) {
+      response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+      response.put("message", "Lỗi: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+  }
+  public ResponseEntity<Map<String, Object>> getAllMembers(Integer projectId) {
+    Map<String, Object> response = new HashMap<>();
+    try {
+      Project project = projectRepository.findById(projectId).orElseThrow(
+              () -> new RuntimeException("Project not found"));
+      List<ProjectMember> projectMembers = projectMemberRepository.findByProject(project);
+      List<Map<String, Object>> membersInfo = projectMembers.stream()
+              .map(pm -> {
+                Map<String, Object> memberInfo = new HashMap<>();
+                memberInfo.put("email", pm.getUser().getEmail());
+                memberInfo.put("role", pm.getRole().toString());
+                memberInfo.put("avatar", pm.getUser().getAvatar()); // Thêm thông tin avatar
+                return memberInfo;
+              })
+              .collect(Collectors.toList());
+      response.put("status", HttpStatus.OK.value());
+      response.put("members", membersInfo);
       return ResponseEntity.status(HttpStatus.OK).body(response);
     } catch (Exception e) {
       response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());

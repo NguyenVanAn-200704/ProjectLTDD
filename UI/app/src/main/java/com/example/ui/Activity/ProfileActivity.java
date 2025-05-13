@@ -14,6 +14,7 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.example.ui.Adapter.ProjectAdapter;
 import com.example.ui.Model.Project;
 import com.example.ui.R;
@@ -39,6 +40,10 @@ public class ProfileActivity extends AppCompatActivity {
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri imageUri;
 
+    private boolean isUploading = false;
+
+    private String avatarUrl = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,30 +64,6 @@ public class ProfileActivity extends AppCompatActivity {
         uploadImg.setOnClickListener(v -> chooseImage());
     }
 
-    void fetchProfileFromAPI(Integer userId) {
-        APIService apiService = RetrofitCilent.getRetrofit().create(APIService.class);
-        Call<Map<String, Object>> call = apiService.profile(userId); // gọi đúng API
-
-        call.enqueue(new Callback<Map<String, Object>>() {
-            @Override
-            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Map<String, Object> user = (Map<String, Object>) response.body().get("user"); // cast đúng kiểu
-                    String name = (String) user.get("name");
-                    String email = (String) user.get("email");
-                    String avatar = (String) user.get("avatar");
-
-                    edtFullName.setText(name);
-                    edtEmail.setText(email);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                t.printStackTrace();
-            }
-        });
-    }
 
     void anhXa() {
         btnHome = findViewById(R.id.btnHome);
@@ -107,6 +88,10 @@ public class ProfileActivity extends AppCompatActivity {
         });
 
         btnSave.setOnClickListener(v -> {
+            if (isUploading) {
+                Toast.makeText(this, "⏳ Vui lòng chờ ảnh tải lên hoàn tất...", Toast.LENGTH_SHORT).show();
+                return;
+            }
             edtFullName.setEnabled(false);
             edtEmail.setEnabled(false);
 
@@ -150,10 +135,12 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void uploadImageToCloudinary(Uri uri) {
-        new UploadAvatar(this, uri, avatarUrl -> {
-            // Sau khi upload thành công, avatarUrl là link ảnh trên cloudinary
+        isUploading = true; // bắt đầu upload
+        new UploadAvatar(this, uri, url -> {
+            avatarUrl = url;
             Log.d("UploadedAvatar", avatarUrl);
-//            updateAvatarToServer(avatarUrl); // Gọi API cập nhật avatar cho user
+            isUploading = false; // upload xong
+            Toast.makeText(ProfileActivity.this, "Ảnh đã tải lên thành công!", Toast.LENGTH_SHORT).show();
         }).execute();
     }
 
@@ -165,31 +152,74 @@ public class ProfileActivity extends AppCompatActivity {
         }
 
         String fullName = edtFullName.getText().toString();
-        String email = edtEmail.getText().toString();
-
-        if (fullName.isEmpty() || email.isEmpty()) {
-            Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin!", Toast.LENGTH_SHORT).show();
+        if (fullName.isEmpty()) {
+            Toast.makeText(this, "Vui lòng nhập họ tên!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        UpdateUserRequest updateUserRequest = new UpdateUserRequest(userId, fullName, email);
+        // Nếu không có ảnh mới, sử dụng ảnh hiện tại từ profile (nếu có)
+        String finalAvatarUrl = avatarUrl != null ? avatarUrl : (String) imageView.getTag(); // Lưu avatar từ API vào tag khi fetch profile
+        if (finalAvatarUrl == null) {
+            Toast.makeText(this, "Vui lòng chọn ảnh đại diện!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Vô hiệu hóa nút Save để ngăn nhấn nhiều lần
+        btnSave.setEnabled(false);
+
+        UpdateUserRequest updateUserRequest = new UpdateUserRequest(userId, fullName, finalAvatarUrl);
         APIService apiService = RetrofitCilent.getRetrofit().create(APIService.class);
         Call<Map<String, Object>> call = apiService.updateUser(updateUserRequest);
 
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                btnSave.setEnabled(true); // Bật lại nút Save
                 if (response.isSuccessful() && response.body() != null) {
                     String message = response.body().get("message").toString();
                     Toast.makeText(ProfileActivity.this, "✅ " + message, Toast.LENGTH_SHORT).show();
+                    // Cập nhật giao diện chỉ khi thành công
+                    edtFullName.setEnabled(false);
+                    uploadImg.setVisibility(View.GONE);
+                    btnSave.setVisibility(View.GONE);
+                    btnEdit.setVisibility(View.VISIBLE);
                 } else {
-                    Toast.makeText(ProfileActivity.this, "❌ Cập nhật thất bại!", Toast.LENGTH_SHORT).show();
+                    String errorMsg = response.errorBody() != null ? response.errorBody().toString() : "Cập nhật thất bại!";
+                    Toast.makeText(ProfileActivity.this, "❌ " + errorMsg, Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                Toast.makeText(ProfileActivity.this, "Lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                btnSave.setEnabled(true); // Bật lại nút Save
+                Toast.makeText(ProfileActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // Cập nhật fetchProfileFromAPI để lưu avatar URL
+    void fetchProfileFromAPI(Integer userId) {
+        APIService apiService = RetrofitCilent.getRetrofit().create(APIService.class);
+        Call<Map<String, Object>> call = apiService.profile(userId);
+
+        call.enqueue(new Callback<Map<String, Object>>() {
+            @Override
+            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Map<String, Object> user = (Map<String, Object>) response.body().get("user");
+                    String name = (String) user.get("name");
+                    String email = (String) user.get("email");
+                    String avatar = (String) user.get("avatar");
+                    Glide.with(ProfileActivity.this).load(avatar).into(imageView);
+                    imageView.setTag(avatar); // Lưu avatar URL để tái sử dụng
+                    edtFullName.setText(name);
+                    edtEmail.setText(email);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                Toast.makeText(ProfileActivity.this, "Lỗi khi tải hồ sơ: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

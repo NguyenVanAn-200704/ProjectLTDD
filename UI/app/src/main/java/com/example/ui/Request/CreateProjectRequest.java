@@ -1,37 +1,34 @@
 package com.example.ui.Request;
 
+import com.example.ui.Model.Member;
+import java.util.List;
+
 public class CreateProjectRequest {
-    private Integer createById;
+    private int createById;
     private String name;
     private String description;
+    private List<Member> members;
 
-    public CreateProjectRequest(Integer createById, String name, String description) {
-        this.createById = createById;
+    public CreateProjectRequest(int userId, String name, String description, List<Member> members) {
+        this.createById = userId;
         this.name = name;
         this.description = description;
+        this.members = members;
     }
 
-    public Integer getCreateById() {
+    public int getCreateById() {
         return createById;
-    }
-
-    public void setCreateById(Integer createById) {
-        this.createById = createById;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public List<Member> getMembers() {
+        return members;
     }
 }
