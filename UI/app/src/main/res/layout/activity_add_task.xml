@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F7F4F0"
+    android:background="#F5F5F5"
     android:padding="16dp"
     tools:context=".Activity.AddTaskActivity">
 
@@ -23,23 +24,25 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:text="New Task"
-            android:textSize="30sp"
-            android:textStyle="bold" />
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="#212121" />
 
         <Button
             android:id="@+id/btnAssign"
             android:layout_width="129dp"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_below="@+id/imgTaskIcon"
             android:layout_alignParentEnd="true"
-            android:layout_gravity="end"
             android:layout_marginStart="85dp"
             android:layout_marginTop="28dp"
             android:layout_marginEnd="17dp"
             android:layout_toEndOf="@+id/tvProjectTitle"
-            android:backgroundTint="#E7E0DA"
+            android:backgroundTint="#2196F3"
             android:text="Assign"
-            android:textColor="#000000" />
+            android:textColor="#FFFFFF"
+            android:elevation="2dp"
+            style="@style/Widget.MaterialComponents.Button" />
 
         <ImageView
             android:id="@+id/imgTaskIcon"
@@ -56,87 +59,155 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:background="#E0E0E0"
+        android:background="#FFFFFF"
         android:padding="16dp"
         android:layout_margin="16dp"
-        android:gravity="center_horizontal">
+        android:gravity="center_horizontal"
+        android:elevation="4dp">
 
-        <EditText
-            android:id="@+id/edtTaskTitle"
+        <!-- Task Title -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilTaskTitle"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:hint="Full Name"
-            android:background="#908B89"
-            android:textColor="#FFFFFF"
-            android:padding="10dp"
-            android:textSize="16sp"
-            android:text="Task Title"
-            android:layout_marginBottom="15dp" />
+            android:layout_height="60dp"
+            app:hintTextColor="#757575"
+            app:boxStrokeColor="#2196F3"
+            app:boxBackgroundColor="#FAFAFA"
+            app:boxCornerRadiusTopStart="8dp"
+            app:boxCornerRadiusTopEnd="8dp"
+            app:boxCornerRadiusBottomStart="8dp"
+            app:boxCornerRadiusBottomEnd="8dp"
+            android:layout_marginBottom="15dp">
 
-        <EditText
-            android:id="@+id/edtTaskDecript"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtTaskTitle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="Task Title"
+                android:textColor="#212121"
+                android:textSize="16sp"
+                android:padding="10dp"
+                android:text="Task Title" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Description -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilTaskDecript"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:hint="Email"
-            android:background="#908B89"
-            android:textColor="#FFFFFF"
-            android:padding="10dp"
-            android:textSize="16sp"
-            android:text="Decription"
-            android:layout_marginBottom="15dp" />
+            android:layout_height="60dp"
+            app:hintTextColor="#757575"
+            app:boxStrokeColor="#2196F3"
+            app:boxBackgroundColor="#FAFAFA"
+            app:boxCornerRadiusTopStart="8dp"
+            app:boxCornerRadiusTopEnd="8dp"
+            app:boxCornerRadiusBottomStart="8dp"
+            app:boxCornerRadiusBottomEnd="8dp"
+            android:layout_marginBottom="15dp">
 
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtTaskDecript"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="Description"
+                android:textColor="#212121"
+                android:textSize="16sp"
+                android:padding="10dp"
+                android:text="Description" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Priority Spinner -->
         <Spinner
             android:id="@+id/spinnerTaskPriority"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:background="#908B89"
+            android:layout_height="60dp"
+            android:background="@drawable/spinner_background"
             android:layout_marginBottom="15dp"
             android:padding="10dp"
             android:spinnerMode="dropdown" />
 
-        <EditText
-            android:id="@+id/edtTaskDue"
+        <!-- Due Date -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilTaskDue"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Due at"
-            android:background="#908B89"
-            android:textColor="#FFFFFF"
-            android:clickable="true"
-            android:focusable="false"
-            android:padding="10dp"
-            android:textSize="16sp"
-            android:layout_marginBottom="15dp" />
+            android:layout_height="60dp"
+            app:hintTextColor="#757575"
+            app:boxStrokeColor="#2196F3"
+            app:boxBackgroundColor="#FAFAFA"
+            app:boxCornerRadiusTopStart="8dp"
+            app:boxCornerRadiusTopEnd="8dp"
+            app:boxCornerRadiusBottomStart="8dp"
+            app:boxCornerRadiusBottomEnd="8dp"
+            android:layout_marginBottom="15dp">
 
-        <!-- Nút thêm file -->
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtTaskDue"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="Due at"
+                android:textColor="#212121"
+                android:textSize="16sp"
+                android:padding="10dp"
+                android:clickable="true"
+                android:focusable="false" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Upload File Section -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp">
+
             <Button
                 android:id="@+id/btnAddFile"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:layout_weight="2"
                 android:layout_gravity="left"
                 android:text="Upload"
-                android:layout_marginTop="10dp" />
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="30dp"
-                android:layout_weight="3"
-                android:background="#908B89"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="10dp"/>
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#2196F3"
+                android:elevation="2dp"
+                style="@style/Widget.MaterialComponents.Button" />
 
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilFileName"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="3"
+                app:hintTextColor="#757575"
+                app:boxStrokeColor="#2196F3"
+                app:boxBackgroundColor="#FAFAFA"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp"
+                android:layout_marginStart="10dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edtFileName"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:hint="File Name"
+                    android:textColor="#212121"
+                    android:textSize="16sp"
+                    android:padding="10dp"
+                    android:focusable="false" />
+            </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
+        <!-- Add Button -->
         <Button
             android:id="@+id/buttonAddProject"
             android:layout_width="120dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:text="Add" />
-
+            android:layout_height="48dp"
+            android:layout_gravity="end"
+            android:text="Add"
+            android:textColor="@color/black"
+            android:backgroundTint="#E7E0DA"
+            android:elevation="2dp"
+            android:layout_marginTop="10dp"
+            style="@style/Widget.MaterialComponents.Button" />
     </LinearLayout>
 
     <!-- Bottom Navigation -->

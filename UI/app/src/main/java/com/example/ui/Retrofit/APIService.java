@@ -1,5 +1,6 @@
 package com.example.ui.Retrofit;
 
+import com.example.ui.Model.Member;
 import com.example.ui.Request.CreateProjectRequest;
 import com.example.ui.Request.LoginRequest;
 import com.example.ui.Request.UpdateUserRequest;
@@ -12,6 +13,8 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface APIService {
     @POST("/user/create")
@@ -37,4 +40,14 @@ public interface APIService {
 
     @GET("/user/profile")
     Call<Map<String, Object>> profile(@retrofit2.http.Query("id") Integer userId);
+
+    @GET("user/check")
+    Call<Map<String, Object>> checkUserByEmail(@Query("email") String email);
+
+    @POST("/project/member/add")
+    Call<Map<String, Object>> addMember(@Body Member member);
+
+    @GET("/project/{projectId}/members")
+    Call<Map<String, Object>> getAllMember(@Path("projectId") int projectId);
+
 }

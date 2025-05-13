@@ -37,4 +37,14 @@
             android:textSize="14sp"
             android:textColor="#555" />
     </LinearLayout>
+
+    <!-- Icon xóa -->
+    <ImageView
+        android:id="@+id/ivDelete"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/ic_delete"
+        android:tint="#FF0000" />
 </LinearLayout>

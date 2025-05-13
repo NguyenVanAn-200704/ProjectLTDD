@@ -41,4 +41,7 @@ public class UserController {
   ResponseEntity<Map<String, Object>> profile(@RequestParam Integer id) {
     return userService.profile(id);
   }
+
+  @GetMapping("/check")
+  ResponseEntity<Map<String, Object>> checkUser(@RequestParam String email) {return userService.checkUserByEmail(email);}
 }

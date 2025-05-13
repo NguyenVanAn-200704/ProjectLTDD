@@ -50,6 +50,7 @@ public class ProjectAdapter {
                         .putInt("projectId", projectId)
                         .apply();
                 Intent intent = new Intent(context, ProjectDetailsActivity.class);
+                intent.putExtra("projectName", project.getName());
                 context.startActivity(intent);
             });
             container.addView(itemView);
