@@ -1,5 +1,6 @@
 package com.example.project.Controller;
 
+import com.example.project.Request.EmailOTPRequest;
 import com.example.project.Request.LoginRequest;
 import com.example.project.Request.UpdateUserRequest;
 import com.example.project.Request.UserRequest;
@@ -32,6 +33,16 @@ public class UserController {
     return userService.login(loginRequest);
   }
 
+  @PostMapping("/sendOTP")
+  ResponseEntity<Map<String, Object>> sendOTP(@RequestParam String email) {
+    return userService.sendOTP(email);
+  }
+
+  @PostMapping("/resetPassword")
+  ResponseEntity<Map<String, Object>> resetPassword(@Valid @RequestBody EmailOTPRequest emailOTPRequest) {
+    return userService.resetPassword(emailOTPRequest);
+  }
+
   @GetMapping("/task/all")
   ResponseEntity<Map<String, Object>> taskAll(@RequestParam Integer id) {
     return userService.allTasksInUser(id);
@@ -43,5 +54,7 @@ public class UserController {
   }
 
   @GetMapping("/check")
-  ResponseEntity<Map<String, Object>> checkUser(@RequestParam String email) {return userService.checkUserByEmail(email);}
+  ResponseEntity<Map<String, Object>> checkUser(@RequestParam String email) {
+    return userService.checkUserByEmail(email);
+  }
 }

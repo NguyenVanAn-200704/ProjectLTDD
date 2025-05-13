@@ -92,6 +92,7 @@ public class ProjectMemberService {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
   }
+
   public ResponseEntity<Map<String, Object>> getAllMembers(Integer projectId) {
     Map<String, Object> response = new HashMap<>();
     try {
