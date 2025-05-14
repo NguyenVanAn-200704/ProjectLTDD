@@ -33,12 +33,17 @@ public class UserController {
     return userService.login(loginRequest);
   }
 
-  @PostMapping("/sendOTP")
+  @PostMapping("/send-otp")
   ResponseEntity<Map<String, Object>> sendOTP(@RequestParam String email) {
     return userService.sendOTP(email);
   }
 
-  @PostMapping("/resetPassword")
+  @PostMapping("/verify-otp")
+  ResponseEntity<Map<String, Object>> verifyOTP(@Valid @RequestBody EmailOTPRequest emailOTPRequest) {
+    return userService.verifyOTP(emailOTPRequest);
+  }
+
+  @PostMapping("/reset-password")
   ResponseEntity<Map<String, Object>> resetPassword(@Valid @RequestBody EmailOTPRequest emailOTPRequest) {
     return userService.resetPassword(emailOTPRequest);
   }

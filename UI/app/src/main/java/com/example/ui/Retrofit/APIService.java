@@ -25,10 +25,13 @@ public interface APIService {
     @POST("/user/login")
     Call<Map<String, Object>> login(@Body LoginRequest loginRequest);
 
-    @POST("/user/sendOTP")
-    Call<Map<String, Object>> sendOTP(@retrofit2.http.Query("email") String email);
+    @POST("/user/send-otp")
+    Call<Map<String, Object>> sendOTP(@Body String request);
 
-    @POST("user/resetPassword")
+    @POST("/user/verify-otp")
+    Call<Map<String, Object>> verifyOTP(@Body EmailOTPRequest emailOTPRequest);
+
+    @POST("/user/reset-password")
     Call<Map<String, Object>> resetPassword(@Body EmailOTPRequest emailOTPRequest);
 
     @POST("/project/create")
@@ -38,18 +41,18 @@ public interface APIService {
     Call<Map<String, Object>> updateUser(@Body UpdateUserRequest updateUserRequest);
 
     @GET("/project/all")
-    Call<Map<String, Object>> allProjects(@retrofit2.http.Query("id") Integer userId);
+    Call<Map<String, Object>> allProjects(@Query("id") Integer userId);
 
     @GET("/project/task/all")
-    Call<Map<String, Object>> allTasksInProject(@retrofit2.http.Query("id") Integer projectId);
+    Call<Map<String, Object>> allTasksInProject(@Query("id") Integer projectId);
 
     @GET("/user/task/all")
-    Call<Map<String, Object>> allTasksInUser(@retrofit2.http.Query("id") Integer userId);
+    Call<Map<String, Object>> allTasksInUser(@Query("id") Integer userId);
 
     @GET("/user/profile")
-    Call<Map<String, Object>> profile(@retrofit2.http.Query("id") Integer userId);
+    Call<Map<String, Object>> profile(@Query("id") Integer userId);
 
-    @GET("user/check")
+    @GET("/user/check")
     Call<Map<String, Object>> checkUserByEmail(@Query("email") String email);
 
     @POST("/project/member/add")
@@ -60,5 +63,4 @@ public interface APIService {
 
     @DELETE("/project/delete")
     Call<Map<String, Object>> deleteProject(@Query("id") Integer id);
-
 }

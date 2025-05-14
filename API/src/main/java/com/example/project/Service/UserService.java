@@ -22,7 +22,11 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -128,9 +132,9 @@ public class UserService {
       otpToken.setOtp(otp);
       otpToken.setCreatedAt(LocalDateTime.now());
       otpToken.setExpiresAt(LocalDateTime.now().plusMinutes(10));
+
       otpTokenRepository.save(otpToken);
 
-      // Gửi email
       SimpleMailMessage message = new SimpleMailMessage();
       message.setTo(email);
       message.setSubject("Khôi phục mật khẩu - Mã OTP");
@@ -148,7 +152,7 @@ public class UserService {
   }
 
   @Transactional
-  public ResponseEntity<Map<String, Object>> resetPassword(EmailOTPRequest emailOTPRequest) {
+  public ResponseEntity<Map<String, Object>> verifyOTP(EmailOTPRequest emailOTPRequest) {
     Map<String, Object> response = new HashMap<>();
 
     try {
@@ -168,6 +172,21 @@ public class UserService {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
       }
 
+      response.put("status", HttpStatus.OK.value());
+      response.put("message", "Xác minh OTP thành công!");
+      return ResponseEntity.ok(response);
+    } catch (Exception e) {
+      response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+      response.put("message", "Lỗi khi xác minh OTP: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+  }
+
+  @Transactional
+  public ResponseEntity<Map<String, Object>> resetPassword(EmailOTPRequest emailOTPRequest) {
+    Map<String, Object> response = new HashMap<>();
+
+    try {
       Optional<User> optionalUser = userRepository.findByEmail(emailOTPRequest.getEmail());
       if (optionalUser.isEmpty()) {
         response.put("status", HttpStatus.NOT_FOUND.value());
@@ -176,28 +195,28 @@ public class UserService {
       }
 
       User user = optionalUser.get();
-
-      String newPassword = (emailOTPRequest.getPassword() != null && !emailOTPRequest.getPassword().isBlank())
-        ? emailOTPRequest.getPassword()
-        : UUID.randomUUID().toString().substring(0, 8);
+      String newPassword = emailOTPRequest.getPassword();
+      if (newPassword == null || newPassword.isBlank()) {
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+        response.put("message", "Mật khẩu mới không được để trống!");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+      }
 
       user.setPassword(newPassword);
       userRepository.save(user);
 
       String subject = "Mật khẩu mới của bạn";
-      String body = "Mật khẩu mới của bạn là: " + newPassword + "\nVui lòng đăng nhập và thay đổi mật khẩu nếu cần.";
-
+      String body = "Mật khẩu của bạn đã được đặt lại thành công. Vui lòng đăng nhập với mật khẩu mới.";
       emailService.sendEmail(user.getEmail(), subject, body);
 
-      otpTokenRepository.delete(otpToken);
+      otpTokenRepository.deleteByEmail(emailOTPRequest.getEmail());
 
       response.put("status", HttpStatus.OK.value());
-      response.put("message", "Mật khẩu mới đã được gửi qua email!");
-      return ResponseEntity.status(HttpStatus.OK).body(response);
-
+      response.put("message", "Đặt lại mật khẩu thành công!");
+      return ResponseEntity.ok(response);
     } catch (Exception e) {
       response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-      response.put("message", "Lỗi khi xác minh OTP: " + e.getMessage());
+      response.put("message", "Lỗi khi đặt lại mật khẩu: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
   }
@@ -243,7 +262,7 @@ public class UserService {
 
     try {
       User user = userRepository.findByEmail(email)
-              .orElseThrow(() -> new RuntimeException("User not found!"));
+        .orElseThrow(() -> new RuntimeException("User not found!"));
 
       Map<String, Object> data = new HashMap<>();
       data.put("email", user.getEmail());
