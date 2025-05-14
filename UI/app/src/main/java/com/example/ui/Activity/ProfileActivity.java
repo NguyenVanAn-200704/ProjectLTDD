@@ -35,7 +35,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private EditText edtFullName, edtEmail;
     private Button btnEdit, btnSave;
-    private ImageButton uploadImg, btnHome, btnTask, btnProfile;
+    private ImageButton uploadImg, btnHome, btnTask, btnProfile, btnLogout;
     private ImageView imageView;
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri imageUri;
@@ -62,10 +62,31 @@ public class ProfileActivity extends AppCompatActivity {
             fetchProfileFromAPI(userId);
         }
         uploadImg.setOnClickListener(v -> chooseImage());
+        btnLogout.setOnClickListener(v -> {
+            // Xóa userId khỏi SharedPreferences
+            getSharedPreferences("UserPreferences", MODE_PRIVATE)
+                    .edit()
+                    .remove("userId")
+                    .apply();
+
+            // Chuyển về màn hình đăng nhập
+            Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Xoá toàn bộ back stack
+            startActivity(intent);
+
+            // Hiển thị thông báo
+            Toast.makeText(ProfileActivity.this, "Đăng xuất thành công", Toast.LENGTH_SHORT).show();
+
+            // Kết thúc activity hiện tại
+            finish();
+        });
+
+
     }
 
 
     void anhXa() {
+        btnLogout = findViewById(R.id.btnLogout);
         btnHome = findViewById(R.id.btnHome);
         btnTask = findViewById(R.id.btnTask);
         btnProfile = findViewById(R.id.btnProfile);

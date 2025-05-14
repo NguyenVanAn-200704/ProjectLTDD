@@ -29,7 +29,7 @@ public interface APIService {
     Call<Map<String, Object>> login(@Body LoginRequest loginRequest);
 
     @POST("/user/send-otp")
-    Call<Map<String, Object>> sendOTP(@Body String request);
+    Call<Map<String, Object>> sendOTP(@Query("email") String email);
 
     @POST("/user/verify-otp")
     Call<Map<String, Object>> verifyOTP(@Body EmailOTPRequest emailOTPRequest);

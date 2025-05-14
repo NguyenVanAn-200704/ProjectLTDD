@@ -169,6 +169,18 @@
                 android:elevation="2dp"
                 style="@style/Widget.MaterialComponents.Button" />
         </LinearLayout>
+        <!-- Logout Icon -->
+        <ImageButton
+            android:id="@+id/btnLogout"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="end"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:contentDescription="Log out"
+            android:elevation="4dp"
+            android:src="@drawable/ic_logout"
+            android:tint="#212121" />
     </LinearLayout>
 
     <!-- Bottom Navigation -->
