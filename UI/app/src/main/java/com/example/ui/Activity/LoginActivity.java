@@ -3,17 +3,12 @@ package com.example.ui.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.example.ui.R;
 import com.example.ui.Request.LoginRequest;
@@ -29,55 +24,34 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
-    EditText editTextEmail;
-    EditText editTextPassword;
-    Button buttonLogin;
-    TextView textViewRegister;
-    TextView textViewForgotPassword;
-    LoginRequest loginRequest;
+    private EditText editTextEmail, editTextPassword;
+    private Button buttonLogin;
+    private TextView textViewRegister, textViewForgotPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
 
         mapping();
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-
         buttonLogin.setOnClickListener(v -> {
-            if (editTextEmail.getText().toString().isEmpty() ||
-                    editTextPassword.getText().toString().isEmpty()) {
-                Toast.makeText(LoginActivity.this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
-            } else {
-                loginRequest = new LoginRequest(editTextEmail.getText().toString(),
-                        editTextPassword.getText().toString());
-                login();
+            if (!isInputValid()) {
+                Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
+                return;
             }
+            login();
         });
 
-        textViewRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
-                startActivity(intent);
-                finish();
-            }
+        textViewRegister.setOnClickListener(v -> {
+            startActivity(new Intent(this, RegisterActivity.class));
+            finish();
         });
 
-        textViewForgotPassword.setOnClickListener((new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        }));
+        textViewForgotPassword.setOnClickListener(v -> {
+            startActivity(new Intent(this, ForgotPasswordActivity.class));
+            finish();
+        });
     }
 
     private void mapping() {
@@ -88,30 +62,33 @@ public class LoginActivity extends AppCompatActivity {
         textViewForgotPassword = findViewById(R.id.textViewForgotPassword);
     }
 
-    private void login() {
-        APIService apiService = RetrofitCilent.getRetrofit().create(APIService.class);
-        Call<Map<String, Object>> stringCall = apiService.login(loginRequest);
+    private boolean isInputValid() {
+        return !editTextEmail.getText().toString().isEmpty()
+                && !editTextPassword.getText().toString().isEmpty();
+    }
 
-        stringCall.enqueue(new Callback<Map<String, Object>>() {
+    private void login() {
+        LoginRequest loginRequest = new LoginRequest(
+                editTextEmail.getText().toString(),
+                editTextPassword.getText().toString()
+        );
+        APIService apiService = RetrofitCilent.getRetrofit().create(APIService.class);
+        Call<Map<String, Object>> call = apiService.login(loginRequest);
+        call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Map<String, Object> responseBody = response.body();
-                    String message = responseBody.get("message").toString();
-                    int status = ((Number) responseBody.get("status")).intValue();
+                    Map<String, Object> body = response.body();
+                    String message = String.valueOf(body.get("message"));
+                    int status = ((Number) body.get("status")).intValue();
 
                     if (status == 200) {
-                        Map<String, Object> userMap = (Map<String, Object>) responseBody.get("user");
+                        Map<String, Object> userMap = (Map<String, Object>) body.get("user");
                         int userId = ((Number) userMap.get("id")).intValue();
                         getSharedPreferences("UserPreferences", MODE_PRIVATE)
-                                .edit()
-                                .putInt("userId", userId)
-                                .apply();
-
+                                .edit().putInt("userId", userId).apply();
                         Toast.makeText(LoginActivity.this, "✅ : " + message, Toast.LENGTH_SHORT).show();
-
-                        Intent intent = new Intent(LoginActivity.this, HomePageActivity.class);
-                        startActivity(intent);
+                        startActivity(new Intent(LoginActivity.this, HomePageActivity.class));
                         finish();
                     } else {
                         Toast.makeText(LoginActivity.this, "❌ : " + message, Toast.LENGTH_SHORT).show();
@@ -120,8 +97,7 @@ public class LoginActivity extends AppCompatActivity {
                     try {
                         String errorJson = response.errorBody().string();
                         JSONObject jsonObject = new JSONObject(errorJson);
-
-                        String message = jsonObject.has("message") ? jsonObject.getString("message") : "Đăng nhập thất bại!";
+                        String message = jsonObject.optString("message", "Đăng nhập thất bại!");
                         Toast.makeText(LoginActivity.this, "❌ : " + message, Toast.LENGTH_LONG).show();
                     } catch (Exception e) {
                         Toast.makeText(LoginActivity.this, "Lỗi 1: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -134,14 +110,8 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
                 Toast.makeText(LoginActivity.this, "Lỗi 2: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-
-                // In lỗi ra Logcat (sẽ hiện trong Tomcat nếu bạn khởi chạy qua Android Studio console)
                 Log.e("RetrofitFailure", "Lỗi khi gọi API đăng nhập", t);
-
-                // Hoặc in trực tiếp ra console:
-                t.printStackTrace();  // cái này cũng hiện trên log hoặc terminal Tomcat nếu bạn capture log từ thiết bị
             }
-
         });
     }
 }

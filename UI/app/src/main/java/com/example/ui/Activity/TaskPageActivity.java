@@ -46,6 +46,9 @@ public class TaskPageActivity extends AppCompatActivity implements TaskTempAdapt
     private String currentSearchQuery = "";
     private String selectedStatus = "";
     private String selectedPriority = "";
+    private int userId;
+    private String role;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +65,8 @@ public class TaskPageActivity extends AppCompatActivity implements TaskTempAdapt
         btnFilter = findViewById(R.id.btnFilter);
 
         int userId = getSharedPreferences("UserPreferences", MODE_PRIVATE).getInt("userId", -1);
+        String role = getSharedPreferences("UserPreferences", MODE_PRIVATE).getString("role", "VIEWER");
+
         if (userId == -1) {
             Toast.makeText(this, "Không tìm thấy userId. Vui lòng đăng nhập lại.", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, LoginActivity.class));
@@ -238,6 +243,9 @@ public class TaskPageActivity extends AppCompatActivity implements TaskTempAdapt
     public void onTaskClick(int taskId) {
         Intent intent = new Intent(this, TaskDetailActivity.class);
         intent.putExtra("taskId", taskId);
+        intent.putExtra("userId", userId);
+        intent.putExtra("role", role);
         startActivity(intent);
     }
+
 }

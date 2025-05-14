@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -105,6 +106,7 @@ public class AddTaskActivity extends AppCompatActivity implements UploadTask.OnT
             tvAssignedTo.setText("Assigned to: None");
             btnClearAssign.setVisibility(View.GONE);
         });
+        navigation();
     }
 
     private boolean isFileSupported(Uri uri) {
@@ -315,5 +317,28 @@ public class AddTaskActivity extends AppCompatActivity implements UploadTask.OnT
     @Override
     public void onPointerCaptureChanged(boolean hasCapture) {
         super.onPointerCaptureChanged(hasCapture);
+    }
+
+    void navigation() {
+        ImageButton btnHome = findViewById(R.id.btnHome);
+        ImageButton btnTask = findViewById(R.id.btnTask);
+        ImageButton btnProfile = findViewById(R.id.btnProfile);
+        btnHome.setOnClickListener(v -> {
+            startActivity(new Intent(this, HomePageActivity.class));
+            overridePendingTransition(0, 0);
+            finish();
+        });
+
+        btnTask.setOnClickListener(v -> {
+            startActivity(new Intent(this, TaskPageActivity.class));
+            overridePendingTransition(0, 0);
+            finish();
+        });
+
+        btnProfile.setOnClickListener(v -> {
+            startActivity(new Intent(this, ProfileActivity.class));
+            overridePendingTransition(0, 0);
+            finish();
+        });
     }
 }
