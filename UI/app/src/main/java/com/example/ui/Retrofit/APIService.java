@@ -2,13 +2,14 @@ package com.example.ui.Retrofit;
 
 import com.example.ui.Model.Member;
 import com.example.ui.Request.CreateProjectRequest;
-import com.example.ui.Request.EmailOTPRequest;
 import com.example.ui.Request.LoginRequest;
+import com.example.ui.Request.ResetPasswordRequest;
 import com.example.ui.Request.TaskRequest;
 import com.example.ui.Request.UpdateProjectMemberRequest;
 import com.example.ui.Request.UpdateTaskRequest;
 import com.example.ui.Request.UpdateUserRequest;
 import com.example.ui.Request.UserRequest;
+import com.example.ui.Request.VerifyOTPRequest;
 
 import java.util.Map;
 
@@ -32,10 +33,10 @@ public interface APIService {
     Call<Map<String, Object>> sendOTP(@Query("email") String email);
 
     @POST("/user/verify-otp")
-    Call<Map<String, Object>> verifyOTP(@Body EmailOTPRequest emailOTPRequest);
+    Call<Map<String, Object>> verifyOTP(@Body VerifyOTPRequest verifyOTPRequest);
 
     @POST("/user/reset-password")
-    Call<Map<String, Object>> resetPassword(@Body EmailOTPRequest emailOTPRequest);
+    Call<Map<String, Object>> resetPassword(@Body ResetPasswordRequest resetPasswordRequest);
 
     @POST("/project/create")
     Call<Map<String, Object>> createProject(@Body CreateProjectRequest createProjectRequest);

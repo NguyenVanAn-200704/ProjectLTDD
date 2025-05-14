@@ -41,8 +41,8 @@ public class UserController {
   }
 
   @PostMapping("/reset-password")
-  ResponseEntity<Map<String, Object>> resetPassword(@Valid @RequestBody EmailOTPRequest emailOTPRequest) {
-    return userService.resetPassword(emailOTPRequest);
+  ResponseEntity<Map<String, Object>> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
+    return userService.resetPassword(resetPasswordRequest);
   }
 
   @GetMapping("/task/all")
