@@ -1,5 +1,6 @@
 package com.example.ui.Activity;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -63,25 +64,31 @@ public class ProfileActivity extends AppCompatActivity {
         }
         uploadImg.setOnClickListener(v -> chooseImage());
         btnLogout.setOnClickListener(v -> {
-            // Xóa userId khỏi SharedPreferences
-            getSharedPreferences("UserPreferences", MODE_PRIVATE)
-                    .edit()
-                    .remove("userId")
-                    .apply();
+            new AlertDialog.Builder(this)
+                    .setTitle("Xác nhận đăng xuất")
+                    .setMessage("Bạn có chắc chắn muốn đăng xuất không?")
+                    .setPositiveButton("Có", (dialog, which) -> {
 
-            // Chuyển về màn hình đăng nhập
-            Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Xoá toàn bộ back stack
-            startActivity(intent);
+                        // Xóa userId khỏi SharedPreferences
+                        getSharedPreferences("UserPreferences", MODE_PRIVATE)
+                                .edit()
+                                .remove("userId")
+                                .apply();
 
-            // Hiển thị thông báo
-            Toast.makeText(ProfileActivity.this, "Đăng xuất thành công", Toast.LENGTH_SHORT).show();
+                        // Chuyển về màn hình đăng nhập
+                        Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Xoá toàn bộ back stack
+                        startActivity(intent);
 
-            // Kết thúc activity hiện tại
-            finish();
+                        // Hiển thị thông báo
+                        Toast.makeText(ProfileActivity.this, "Đăng xuất thành công", Toast.LENGTH_SHORT).show();
+
+                        // Kết thúc activity hiện tại
+                        finish();
+                    })
+                .setNegativeButton("Hủy", null)
+                .show();
         });
-
-
     }
 
 

@@ -86,4 +86,7 @@ public interface APIService {
 
     @GET("/project/member/role")
     Call<Map<String, Object>> getUserRole(@Query("projectId") Integer projectId,@Query("userId") Integer userId);
+
+    @DELETE("/project/task/delete")
+    Call<Map<String,Object>> deleteTask(@Query("id") Integer id);
 }

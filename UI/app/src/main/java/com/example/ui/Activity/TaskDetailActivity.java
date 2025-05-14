@@ -3,6 +3,7 @@ package com.example.ui.Activity;
 import static com.example.ui.Enum.ProjectRole.ADMIN;
 import static com.example.ui.Enum.ProjectRole.MEMBER;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.DownloadManager;
 import android.app.ProgressDialog;
@@ -64,7 +65,7 @@ public class TaskDetailActivity extends AppCompatActivity implements UploadTask.
     private TextView tvCreatedOn, tvAssignedTo, tvFileUrl;
     private Spinner spinnerTaskPriority, spinnerTaskStatus;
     private Button btnEdit, btnAddFile, btnAssign, btnClearAssign;
-    private ImageView imgTaskIcon;
+    private ImageView imgTaskIcon,btnDelete;
 
     private int userId;
     private String role;
@@ -118,6 +119,7 @@ public class TaskDetailActivity extends AppCompatActivity implements UploadTask.
         switch (projectRole) {
             case VIEWER:
                 // Ẩn tất cả button
+                btnDelete.setVisibility(View.GONE);
                 btnAssign.setVisibility(View.GONE);
                 btnClearAssign.setVisibility(View.GONE);
                 btnAddFile.setVisibility(View.GONE);
@@ -143,6 +145,7 @@ public class TaskDetailActivity extends AppCompatActivity implements UploadTask.
 
                             if (isAssignedUser) {
                                 // Chỉ cho phép chỉnh sửa status và nút Save
+                                btnDelete.setVisibility(View.GONE);
                                 btnAssign.setVisibility(View.GONE);
                                 btnClearAssign.setVisibility(View.GONE);
                                 btnAddFile.setVisibility(View.GONE);
@@ -153,7 +156,7 @@ public class TaskDetailActivity extends AppCompatActivity implements UploadTask.
                                 spinnerTaskPriority.setEnabled(false);
                                 spinnerTaskStatus.setEnabled(true);
                             } else {
-                                // Tương tự VIEWER
+                                btnDelete.setVisibility(View.GONE);
                                 btnAssign.setVisibility(View.GONE);
                                 btnClearAssign.setVisibility(View.GONE);
                                 btnAddFile.setVisibility(View.GONE);
@@ -180,6 +183,7 @@ public class TaskDetailActivity extends AppCompatActivity implements UploadTask.
 
             case ADMIN:
                 // Toàn quyền
+                btnDelete.setVisibility(View.VISIBLE);
                 btnAssign.setVisibility(View.VISIBLE);
                 btnClearAssign.setVisibility(assignedEmail != null ? View.VISIBLE : View.GONE);
                 btnAddFile.setVisibility(View.VISIBLE);
@@ -206,6 +210,7 @@ public class TaskDetailActivity extends AppCompatActivity implements UploadTask.
     }
 
     private void anhxa() {
+        btnDelete = findViewById((R.id.btnDelete));
         edtTaskTitle = findViewById(R.id.edtTaskTitle);
         edtTaskDescription = findViewById(R.id.edtTaskDecript);
         edtTaskDue = findViewById(R.id.edtTaskDue);
@@ -222,6 +227,7 @@ public class TaskDetailActivity extends AppCompatActivity implements UploadTask.
     }
 
     private void setupButtonListeners() {
+        btnDelete.setOnClickListener(v-> deleteTask());
         btnAddFile.setOnClickListener(v -> openFilePicker());
         btnAssign.setOnClickListener(v -> showAssignMemberDialog());
         btnClearAssign.setOnClickListener(v -> {
@@ -277,6 +283,37 @@ public class TaskDetailActivity extends AppCompatActivity implements UploadTask.
                 Log.e("FetchTaskFailure", "Error: " + t.toString());
             }
         });
+    }
+
+    private void deleteTask(){
+        new AlertDialog.Builder(this)
+                .setTitle("Xác nhận xóa")
+                .setMessage("Bạn có chắc chắn muốn xóa task không?")
+                .setPositiveButton("Xóa", (dialog, which) -> {
+                    APIService apiService = RetrofitCilent.getRetrofit().create(APIService.class);
+                    Call<Map<String, Object>> call = apiService.deleteTask(taskId);
+
+                    call.enqueue(new Callback<Map<String, Object>>() {
+                        @Override
+                        public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                Toast.makeText(TaskDetailActivity.this, "Xóa Task thành công" , Toast.LENGTH_SHORT).show();
+                                setResult(RESULT_OK); // báo về Activity trước là đã xóa
+                                finish();
+                            } else {
+                                Toast.makeText(TaskDetailActivity.this, "Xóa task thất bại: " + response.code(), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                            Log.e("ProjectAdapter", "Delete project error: " + t.getMessage());
+                            Toast.makeText(TaskDetailActivity.this, "Lỗi kết nối API: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
     }
 
     private Task mapTask(Map<String, Object> taskMap) {
