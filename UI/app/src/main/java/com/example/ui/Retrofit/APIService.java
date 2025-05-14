@@ -2,6 +2,7 @@ package com.example.ui.Retrofit;
 
 import com.example.ui.Model.Member;
 import com.example.ui.Request.CreateProjectRequest;
+import com.example.ui.Request.EmailOTPRequest;
 import com.example.ui.Request.LoginRequest;
 import com.example.ui.Request.TaskRequest;
 import com.example.ui.Request.UpdateProjectMemberRequest;
@@ -27,6 +28,15 @@ public interface APIService {
     @POST("/user/login")
     Call<Map<String, Object>> login(@Body LoginRequest loginRequest);
 
+    @POST("/user/send-otp")
+    Call<Map<String, Object>> sendOTP(@Body String request);
+
+    @POST("/user/verify-otp")
+    Call<Map<String, Object>> verifyOTP(@Body EmailOTPRequest emailOTPRequest);
+
+    @POST("/user/reset-password")
+    Call<Map<String, Object>> resetPassword(@Body EmailOTPRequest emailOTPRequest);
+
     @POST("/project/create")
     Call<Map<String, Object>> createProject(@Body CreateProjectRequest createProjectRequest);
 
@@ -34,18 +44,18 @@ public interface APIService {
     Call<Map<String, Object>> updateUser(@Body UpdateUserRequest updateUserRequest);
 
     @GET("/project/all")
-    Call<Map<String, Object>> allProjects(@retrofit2.http.Query("id") Integer userId);
+    Call<Map<String, Object>> allProjects(@Query("id") Integer userId);
 
     @GET("/project/task/all")
-    Call<Map<String, Object>> allTasksInProject(@retrofit2.http.Query("id") Integer projectId);
+    Call<Map<String, Object>> allTasksInProject(@Query("id") Integer projectId);
 
     @GET("/user/task/all")
-    Call<Map<String, Object>> allTasksInUser(@retrofit2.http.Query("id") Integer userId);
+    Call<Map<String, Object>> allTasksInUser(@Query("id") Integer userId);
 
     @GET("/user/profile")
-    Call<Map<String, Object>> profile(@retrofit2.http.Query("id") Integer userId);
+    Call<Map<String, Object>> profile(@Query("id") Integer userId);
 
-    @GET("user/check")
+    @GET("/user/check")
     Call<Map<String, Object>> checkUserByEmail(@Query("email") String email);
 
     @POST("/project/member/add")
@@ -70,6 +80,6 @@ public interface APIService {
 
     @GET("/project/task/get")
     Call<Map<String,Object>> getTaskById(@Query("id") int id);
-
-
+    @DELETE("/project/delete")
+    Call<Map<String, Object>> deleteProject(@Query("id") Integer id);
 }

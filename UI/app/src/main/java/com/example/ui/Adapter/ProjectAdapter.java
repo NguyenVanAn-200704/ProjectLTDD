@@ -2,10 +2,12 @@ package com.example.ui.Adapter;
 
 import static android.content.Context.MODE_PRIVATE;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,8 +17,13 @@ import com.example.ui.Activity.LoginActivity;
 import com.example.ui.Activity.ProjectDetailsActivity;
 import com.example.ui.Model.Project;
 import com.example.ui.R;
+import com.example.ui.Retrofit.APIService;
+import com.example.ui.Retrofit.RetrofitCilent;
 
 import java.util.List;
+import java.util.Map;
+
+import retrofit2.Call;
 
 public class ProjectAdapter {
 
@@ -39,11 +46,12 @@ public class ProjectAdapter {
 
             TextView tvName = itemView.findViewById(R.id.tvProjectName);
             TextView tvMember = itemView.findViewById(R.id.tvProjectMembers);
+            ImageView ivDelete = itemView.findViewById(R.id.ivDelete);
 
             tvName.setText(project.getName());
             tvMember.setText(project.getMemberCount() + " members");
 
-            itemView.setOnClickListener(v->{
+            itemView.setOnClickListener(v -> {
                 int projectId = project.getId();
                 context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
                         .edit()
@@ -53,6 +61,38 @@ public class ProjectAdapter {
                 intent.putExtra("projectName", project.getName());
                 context.startActivity(intent);
             });
+
+            ivDelete.setOnClickListener(v -> {
+                new AlertDialog.Builder(context)
+                        .setTitle("Xác nhận xóa")
+                        .setMessage("Bạn có chắc chắn muốn xóa dự án \"" + project.getName() + "\" không?")
+                        .setPositiveButton("Xóa", (dialog, which) -> {
+                            APIService apiService = RetrofitCilent.getRetrofit().create(APIService.class);
+                            Call<Map<String, Object>> call = apiService.deleteProject(project.getId());
+
+                            call.enqueue(new retrofit2.Callback<Map<String, Object>>() {
+                                @Override
+                                public void onResponse(Call<Map<String, Object>> call, retrofit2.Response<Map<String, Object>> response) {
+                                    if (response.isSuccessful() && response.body() != null) {
+                                        Toast.makeText(context, "Đã xóa dự án: " + project.getName(), Toast.LENGTH_SHORT).show();
+                                        projectList.remove(project);
+                                        loadProjects(); // reload lại giao diện
+                                    } else {
+                                        Toast.makeText(context, "Xóa thất bại!", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                                    Toast.makeText(context, "Lỗi kết nối API!", Toast.LENGTH_SHORT).show();
+                                    t.printStackTrace();
+                                }
+                            });
+                        })
+                        .setNegativeButton("Hủy", null)
+                        .show();
+            });
+
             container.addView(itemView);
         }
     }

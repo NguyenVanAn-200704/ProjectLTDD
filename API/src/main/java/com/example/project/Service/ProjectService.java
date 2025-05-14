@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -98,11 +99,21 @@ public class ProjectService {
     Map<String, Object> response = new HashMap<>();
 
     try {
+      if (!projectRepository.existsById(id)) {
+        response.put("status", HttpStatus.NOT_FOUND.value());
+        response.put("message", "Project không tồn tại");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+      }
+
+      taskRepository.deleteAllByProjectId(id);
+      projectMemberRepository.deleteAllByProjectId(id);
       projectRepository.deleteById(id);
+
       response.put("status", HttpStatus.OK.value());
       response.put("message", "Xóa project thành công");
       return ResponseEntity.status(HttpStatus.OK).body(response);
     } catch (Exception e) {
+      e.printStackTrace();
       response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
       response.put("message", "Lỗi: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
