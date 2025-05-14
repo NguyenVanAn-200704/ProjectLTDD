@@ -19,6 +19,7 @@ import android.view.View;
 import android.webkit.URLUtil;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -102,6 +103,7 @@ public class TaskDetailActivity extends AppCompatActivity implements UploadTask.
         pickDateEvent();
         setupButtonListeners();
         fetchTaskDetails(taskId);
+        navigation();
     }
 
     // Thêm phương thức applyRolePermissions
@@ -649,5 +651,24 @@ public class TaskDetailActivity extends AppCompatActivity implements UploadTask.
         if (progressDialog != null && progressDialog.isShowing()) {
             progressDialog.dismiss();
         }
+    }
+    void navigation() {
+        ImageButton btnHome = findViewById(R.id.btnHome);
+        ImageButton btnTask = findViewById(R.id.btnTask);
+        ImageButton btnProfile = findViewById(R.id.btnProfile);
+        btnHome.setOnClickListener(v -> {
+            startActivity(new Intent(this, HomePageActivity.class));
+            overridePendingTransition(0, 0);
+        });
+
+        btnTask.setOnClickListener(v -> {
+            startActivity(new Intent(this, TaskPageActivity.class));
+            overridePendingTransition(0, 0);
+        });
+
+        btnProfile.setOnClickListener(v -> {
+            startActivity(new Intent(this, ProfileActivity.class));
+            overridePendingTransition(0, 0);
+        });
     }
 }
