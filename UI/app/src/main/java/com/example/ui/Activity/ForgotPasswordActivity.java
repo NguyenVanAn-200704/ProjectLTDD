@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.method.PasswordTransformationMethod;
 import android.text.method.SingleLineTransformationMethod;
 import android.view.View;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -18,7 +19,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.ui.R;
-import com.example.ui.Request.EmailOTPRequest;
+import com.example.ui.Request.ResetPasswordRequest;
+import com.example.ui.Request.VerifyOTPRequest;
 import com.example.ui.Retrofit.APIService;
 import com.example.ui.Retrofit.RetrofitCilent;
 
@@ -160,7 +162,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
     private void verifyOTP(String otp) {
         APIService apiService = RetrofitCilent.getRetrofit().create(APIService.class);
-        Call<Map<String, Object>> call = apiService.verifyOTP(new EmailOTPRequest(userEmail, null, otp));
+        Call<Map<String, Object>> call = apiService.verifyOTP(new VerifyOTPRequest(userEmail, otp));
 
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
@@ -190,8 +192,8 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
     private void confirmReset(String email, String newPassword) {
         APIService apiService = RetrofitCilent.getRetrofit().create(APIService.class);
-        EmailOTPRequest request = new EmailOTPRequest(email, newPassword, null);
-        Call<Map<String, Object>> call = apiService.resetPassword(request);
+        ResetPasswordRequest resetPasswordRequest = new ResetPasswordRequest(email, newPassword);
+        Call<Map<String, Object>> call = apiService.resetPassword(resetPasswordRequest);
 
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override

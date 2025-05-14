@@ -9,10 +9,7 @@ import com.example.project.Mapper.UserMapper;
 import com.example.project.Repository.OTPTokenRepository;
 import com.example.project.Repository.TaskRepository;
 import com.example.project.Repository.UserRepository;
-import com.example.project.Request.EmailOTPRequest;
-import com.example.project.Request.LoginRequest;
-import com.example.project.Request.UpdateUserRequest;
-import com.example.project.Request.UserRequest;
+import com.example.project.Request.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -152,12 +149,12 @@ public class UserService {
   }
 
   @Transactional
-  public ResponseEntity<Map<String, Object>> verifyOTP(EmailOTPRequest emailOTPRequest) {
+  public ResponseEntity<Map<String, Object>> verifyOTP(VerifyOTPRequest verifyOTPRequest) {
     Map<String, Object> response = new HashMap<>();
 
     try {
       Optional<OTPToken> otpTokenOptional = otpTokenRepository.findByEmailAndOtp(
-        emailOTPRequest.getEmail(), emailOTPRequest.getOtp());
+        verifyOTPRequest.getEmail(), verifyOTPRequest.getOtp());
 
       if (otpTokenOptional.isEmpty()) {
         response.put("status", HttpStatus.BAD_REQUEST.value());
@@ -183,11 +180,11 @@ public class UserService {
   }
 
   @Transactional
-  public ResponseEntity<Map<String, Object>> resetPassword(EmailOTPRequest emailOTPRequest) {
+  public ResponseEntity<Map<String, Object>> resetPassword(ResetPasswordRequest resetPasswordRequest) {
     Map<String, Object> response = new HashMap<>();
 
     try {
-      Optional<User> optionalUser = userRepository.findByEmail(emailOTPRequest.getEmail());
+      Optional<User> optionalUser = userRepository.findByEmail(resetPasswordRequest.getEmail());
       if (optionalUser.isEmpty()) {
         response.put("status", HttpStatus.NOT_FOUND.value());
         response.put("message", "Người dùng không tồn tại!");
@@ -195,7 +192,7 @@ public class UserService {
       }
 
       User user = optionalUser.get();
-      String newPassword = emailOTPRequest.getPassword();
+      String newPassword = resetPasswordRequest.getPassword();
       if (newPassword == null || newPassword.isBlank()) {
         response.put("status", HttpStatus.BAD_REQUEST.value());
         response.put("message", "Mật khẩu mới không được để trống!");
@@ -209,7 +206,7 @@ public class UserService {
       String body = "Mật khẩu của bạn đã được đặt lại thành công. Vui lòng đăng nhập với mật khẩu mới.";
       emailService.sendEmail(user.getEmail(), subject, body);
 
-      otpTokenRepository.deleteByEmail(emailOTPRequest.getEmail());
+      otpTokenRepository.deleteByEmail(resetPasswordRequest.getEmail());
 
       response.put("status", HttpStatus.OK.value());
       response.put("message", "Đặt lại mật khẩu thành công!");
