@@ -2,9 +2,12 @@ package com.example.ui.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.method.PasswordTransformationMethod;
+import android.text.method.SingleLineTransformationMethod;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,7 +37,9 @@ public class RegisterActivity extends AppCompatActivity {
     EditText editTextName;
     Button buttonRegister;
     TextView textViewLogin;
+    ImageView togglePassword;
     UserRequest userRequest;
+    private boolean isPasswordVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,13 +74,26 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
 
-        textViewLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                startActivity(intent);
-                finish();
+        textViewLogin.setOnClickListener(v -> {
+            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        });
+
+        // Xử lý toggle hiển thị/ẩn mật khẩu cho cả hai EditText
+        togglePassword.setOnClickListener(v -> {
+            isPasswordVisible = !isPasswordVisible;
+            if (isPasswordVisible) {
+                editTextPassword.setTransformationMethod(SingleLineTransformationMethod.getInstance());
+                editTextConfirmPassword.setTransformationMethod(SingleLineTransformationMethod.getInstance());
+                togglePassword.setImageResource(R.drawable.eye_on);
+            } else {
+                editTextPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                editTextConfirmPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                togglePassword.setImageResource(R.drawable.eye_off);
             }
+            editTextPassword.setSelection(editTextPassword.getText().length());
+            editTextConfirmPassword.setSelection(editTextConfirmPassword.getText().length());
         });
     }
 
@@ -86,6 +104,7 @@ public class RegisterActivity extends AppCompatActivity {
         editTextName = findViewById(R.id.editTextName);
         buttonRegister = findViewById(R.id.buttonRegister);
         textViewLogin = findViewById(R.id.textViewLogin);
+        togglePassword = findViewById(R.id.toggle_password);
     }
 
     private void register() {
@@ -102,7 +121,6 @@ public class RegisterActivity extends AppCompatActivity {
 
                     if (status == 201) {
                         Toast.makeText(RegisterActivity.this, "✅ : " + message, Toast.LENGTH_SHORT).show();
-
                         Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
                         startActivity(intent);
                         finish();
@@ -113,7 +131,6 @@ public class RegisterActivity extends AppCompatActivity {
                     try {
                         String errorJson = response.errorBody().string();
                         JSONObject jsonObject = new JSONObject(errorJson);
-
                         String message = jsonObject.has("message") ? jsonObject.getString("message") : "Đăng ký thất bại!";
                         Toast.makeText(RegisterActivity.this, "❌ : " + message, Toast.LENGTH_LONG).show();
                     } catch (Exception e) {

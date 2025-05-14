@@ -137,6 +137,7 @@ public class ProjectService {
                 return new ProjectResponse(
                         project.getId(),
                         project.getName(),
+                        project.getCreateBy().getId(),
                         project.getProjectMembers() != null ? project.getProjectMembers().size() : 0
                 );
               })

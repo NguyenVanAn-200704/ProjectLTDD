@@ -5,9 +5,12 @@ public class Project {
     private String name;
     private int memberCount;
 
-    public Project(Integer id, String name, int memberCount) {
+    private Integer createBy;
+
+    public Project(Integer id,Integer createBy,  String name, int memberCount) {
         this.id = id;
         this.name = name;
+        this.createBy = createBy;
         this.memberCount = memberCount;
     }
 
@@ -18,6 +21,8 @@ public class Project {
     public String getName() {
         return name;
     }
+
+    public Integer getCreateBy(){return  createBy;}
 
     public int getMemberCount() {
         return memberCount;

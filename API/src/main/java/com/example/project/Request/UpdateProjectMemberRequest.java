@@ -9,4 +9,6 @@ public class UpdateProjectMemberRequest {
   private Integer id;
 
   private String role;
+
+  private Integer currentUserId;
 }

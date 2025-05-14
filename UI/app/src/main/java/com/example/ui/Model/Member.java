@@ -4,6 +4,8 @@ public class Member {
     private Integer id; // Thêm id
     private Integer projectId;
     private String email;
+
+    private Integer userId;
     private String role;
     private String avatar;
 
@@ -19,8 +21,9 @@ public class Member {
         this.avatar = avatar;
     }
 
-    public Member(Integer id, String email, String role, String avatar) {
+    public Member(Integer id, Integer userId,String email, String role, String avatar) {
         this.id = id;
+        this.userId = userId;
         this.email = email;
         this.role = role;
         this.avatar = avatar;
@@ -29,6 +32,8 @@ public class Member {
     public Integer getId() {
         return id;
     }
+
+    public Integer getUserId(){return userId;}
 
     public void setId(Integer id) {
         this.id = id;

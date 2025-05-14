@@ -54,7 +54,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="400dp"
+            android:layout_height="match_parent"
             android:orientation="vertical"
             android:padding="24dp">
 
@@ -130,12 +130,13 @@
                 android:layout_gravity="end"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
+                android:clickable="true"
+                android:focusable="true"
                 android:text="Quên mật khẩu?"
                 android:textColor="#023e8a"
                 android:textSize="14sp"
-                android:textStyle="bold"
-                android:clickable="true"
-                android:focusable="true" />
+                android:textStyle="bold" />
+
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/buttonLogin"
@@ -150,7 +151,6 @@
                 android:textAllCaps="false"
                 android:textColor="#780000"
                 android:textSize="20sp" />
-
 
             <TextView
                 android:id="@+id/or_text"

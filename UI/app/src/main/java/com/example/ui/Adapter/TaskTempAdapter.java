@@ -23,6 +23,9 @@ public class TaskTempAdapter extends RecyclerView.Adapter<TaskTempAdapter.TaskVi
     private List<TaskTemp> taskList;
     private OnTaskClickListener listener;
 
+    private String role; // Thêm trường role
+    private int userId;
+
     public interface OnTaskClickListener {
         void onTaskClick(int taskId);
     }
@@ -44,7 +47,7 @@ public class TaskTempAdapter extends RecyclerView.Adapter<TaskTempAdapter.TaskVi
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
         TaskTemp task = taskList.get(position);
-        holder.tvTitle.setText(task.getTitle()); // Dòng 47 gây lỗi
+        holder.tvTitle.setText(task.getTitle());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         holder.tvDueDate.setText("Due at: " + task.getDueDate().format(formatter));
 

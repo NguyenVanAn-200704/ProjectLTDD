@@ -22,7 +22,7 @@ public class ProjectMemberController {
 
   @PutMapping("/member/update")
   ResponseEntity<Map<String, Object>> updateProjectMember(@RequestBody UpdateProjectMemberRequest updateProjectMemberRequest) {
-    return projectMemberService.updateProjectMember(updateProjectMemberRequest);
+    return projectMemberService.updateMemberRole(updateProjectMemberRequest);
   }
 
   @DeleteMapping("/member/delete")

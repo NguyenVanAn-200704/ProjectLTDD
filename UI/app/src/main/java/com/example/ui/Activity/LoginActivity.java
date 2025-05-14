@@ -2,9 +2,12 @@ package com.example.ui.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.method.PasswordTransformationMethod;
+import android.text.method.SingleLineTransformationMethod;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +30,8 @@ public class LoginActivity extends AppCompatActivity {
     private EditText editTextEmail, editTextPassword;
     private Button buttonLogin;
     private TextView textViewRegister, textViewForgotPassword;
+    private ImageView togglePassword;
+    private boolean isPasswordVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +57,22 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(new Intent(this, ForgotPasswordActivity.class));
             finish();
         });
+
+        // Xử lý toggle hiển thị/ẩn mật khẩu
+        togglePassword.setOnClickListener(v -> {
+            isPasswordVisible = !isPasswordVisible;
+            if (isPasswordVisible) {
+                // Hiển thị mật khẩu
+                editTextPassword.setTransformationMethod(SingleLineTransformationMethod.getInstance());
+                togglePassword.setImageResource(R.drawable.eye_on);
+            } else {
+                // Ẩn mật khẩu
+                editTextPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                togglePassword.setImageResource(R.drawable.eye_off);
+            }
+            // Di chuyển con trỏ về cuối văn bản
+            editTextPassword.setSelection(editTextPassword.getText().length());
+        });
     }
 
     private void mapping() {
@@ -60,6 +81,7 @@ public class LoginActivity extends AppCompatActivity {
         buttonLogin = findViewById(R.id.buttonLogin);
         textViewRegister = findViewById(R.id.textViewRegister);
         textViewForgotPassword = findViewById(R.id.textViewForgotPassword);
+        togglePassword = findViewById(R.id.toggle_password);
     }
 
     private boolean isInputValid() {
@@ -85,6 +107,7 @@ public class LoginActivity extends AppCompatActivity {
                     if (status == 200) {
                         Map<String, Object> userMap = (Map<String, Object>) body.get("user");
                         int userId = ((Number) userMap.get("id")).intValue();
+                        String userEmail = (String) userMap.get("email");
                         getSharedPreferences("UserPreferences", MODE_PRIVATE)
                                 .edit().putInt("userId", userId).apply();
                         Toast.makeText(LoginActivity.this, "✅ : " + message, Toast.LENGTH_SHORT).show();

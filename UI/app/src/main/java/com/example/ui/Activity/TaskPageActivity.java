@@ -57,15 +57,14 @@ public class TaskPageActivity extends AppCompatActivity implements TaskTempAdapt
 
         recyclerView = findViewById(R.id.taskListContainer);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new TaskTempAdapter(this, filteredTasks, this); // Sử dụng filteredTasks cho adapter
+        adapter = new TaskTempAdapter(this, filteredTasks, this);
         recyclerView.setAdapter(adapter);
 
         edtSearchTask = findViewById(R.id.edtSearchTask);
         btnSearch = findViewById(R.id.btnSearch);
         btnFilter = findViewById(R.id.btnFilter);
 
-        int userId = getSharedPreferences("UserPreferences", MODE_PRIVATE).getInt("userId", -1);
-        String role = getSharedPreferences("UserPreferences", MODE_PRIVATE).getString("role", "VIEWER");
+        userId = getSharedPreferences("UserPreferences", MODE_PRIVATE).getInt("userId", -1);
 
         if (userId == -1) {
             Toast.makeText(this, "Không tìm thấy userId. Vui lòng đăng nhập lại.", Toast.LENGTH_SHORT).show();
@@ -101,28 +100,59 @@ public class TaskPageActivity extends AppCompatActivity implements TaskTempAdapt
                 }
 
                 List<Map<String, Object>> data = (List<Map<String, Object>>) tasksObj;
-                allTasks.clear(); // Clear danh sách cũ
+                allTasks.clear();
                 filteredTasks.clear();
 
                 for (Map<String, Object> taskMap : data) {
+                    Map<String, Object> projectMap = (Map<String, Object>) taskMap.get("project");
+
+                    Integer projectId = null;
+                    if (projectMap != null) {
+                        Number projectIdNumber = (Number) projectMap.get("id");
+                        projectId = projectIdNumber != null ? projectIdNumber.intValue() : null;
+                    }
                     Number idNumber = (Number) taskMap.get("id");
                     Integer id = idNumber != null ? idNumber.intValue() : null;
                     String title = (String) taskMap.get("title");
                     String dueDateStr = (String) taskMap.get("dueDate");
-                    String status = (String) taskMap.get("status"); // Cần status cho filter
-                    String priority = (String) taskMap.get("priority"); // Cần priority cho filter
+                    String status = (String) taskMap.get("status");
+                    String priority = (String) taskMap.get("priority");
 
-                    if (id == null || title == null || dueDateStr == null) continue;
+                    if (id == null || title == null || dueDateStr == null || projectId == null) continue;
 
-                    try {
-                        LocalDate dueDate = LocalDate.parse(dueDateStr);
-                        allTasks.add(new TaskTemp(id, title, dueDate, status, priority)); // Giả sử TaskTemp có thêm status và priority
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    // Gọi API getUserRole
+                    Call<Map<String, Object>> roleCall = apiService.getUserRole(projectId, userId);
+                    final String[] role = {"VIEWER"}; // Mặc định là VIEWER
+                    Integer finalProjectId = projectId;
+                    roleCall.enqueue(new Callback<Map<String, Object>>() {
+                        @Override
+                        public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                Map<String, Object> roleData = response.body();
+                                role[0] = (String) roleData.get("role"); // Giả định API trả về {"role": "ADMIN/MEMBER/VIEWER"}
+                            }
+                            try {
+                                LocalDate dueDate = LocalDate.parse(dueDateStr);
+                                allTasks.add(new TaskTemp(id, finalProjectId, title, dueDate, status, priority, role[0]));
+                                applyFilters(); // Cập nhật filter sau khi thêm task
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                            // Nếu gọi API role thất bại, dùng role mặc định
+                            try {
+                                LocalDate dueDate = LocalDate.parse(dueDateStr);
+                                allTasks.add(new TaskTemp(id, finalProjectId, title, dueDate, status, priority, role[0]));
+                                applyFilters();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
                 }
-
-                applyFilters(); // Gọi applyFilters sau khi tải dữ liệu
             }
 
             @Override
@@ -241,11 +271,19 @@ public class TaskPageActivity extends AppCompatActivity implements TaskTempAdapt
 
     @Override
     public void onTaskClick(int taskId) {
-        Intent intent = new Intent(this, TaskDetailActivity.class);
-        intent.putExtra("taskId", taskId);
-        intent.putExtra("userId", userId);
-        intent.putExtra("role", role);
-        startActivity(intent);
+        TaskTemp selectedTask = allTasks.stream()
+                .filter(task -> task.getId() == taskId)
+                .findFirst()
+                .orElse(null);
+        if (selectedTask != null) {
+            Intent intent = new Intent(this, TaskDetailActivity.class);
+            intent.putExtra("taskId", taskId);
+            intent.putExtra("userId", userId);
+            intent.putExtra("role", selectedTask.getRole());
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, "Không tìm thấy task!", Toast.LENGTH_SHORT).show();
+        }
     }
 
 }

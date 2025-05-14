@@ -34,7 +34,7 @@ public class Task implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "projectId", nullable = false)
-  @JsonBackReference
+  @JsonManagedReference
   Project project;
 
   @ManyToOne

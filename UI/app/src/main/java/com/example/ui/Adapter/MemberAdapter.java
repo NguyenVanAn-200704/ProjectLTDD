@@ -23,19 +23,21 @@ import java.util.List;
 public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.MemberViewHolder> {
     private List<Member> memberList;
     private Context context;
+    private int userId;
+    private int projectCreatorId; // Thêm projectCreatorId
     private OnMemberActionListener actionListener;
 
-    // Callback interface
     public interface OnMemberActionListener {
         void onUpdateMember(Member member, String newRole);
         void onDeleteMember(Member member);
-
         void onTaskUploadFailure(String errorMessage);
     }
 
-    public MemberAdapter(Context context, List<Member> memberList, OnMemberActionListener actionListener) {
+    public MemberAdapter(Context context, List<Member> memberList, int userId, int projectCreatorId, OnMemberActionListener actionListener) {
         this.context = context;
         this.memberList = memberList;
+        this.userId = userId;
+        this.projectCreatorId = projectCreatorId;
         this.actionListener = actionListener;
     }
 
@@ -66,25 +68,39 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.MemberView
         holder.spinnerRole.setAdapter(spinnerAdapter);
         holder.spinnerRole.setSelection(roles.indexOf(member.getRole()));
 
-        // Handle PopupMenu
-        holder.btnMore.setOnClickListener(v -> {
-            PopupMenu popupMenu = new PopupMenu(context, holder.btnMore);
-            popupMenu.getMenu().add("Cập nhật");
-            popupMenu.getMenu().add("Xóa");
+        // Kiểm tra quyền chỉnh sửa
+        if (member.getUserId() == userId) {
+            // Vô hiệu hóa cho chính người dùng hiện tại
+            holder.spinnerRole.setEnabled(false);
+            holder.btnMore.setVisibility(View.GONE);
+        } else if (member.getRole().equals("ADMIN") && userId != projectCreatorId) {
+            // Vô hiệu hóa cho Admin khác nếu không phải createBy
+            holder.spinnerRole.setEnabled(false);
+            holder.btnMore.setVisibility(View.GONE);
+        } else {
+            // Kích hoạt cho các trường hợp khác
+            holder.spinnerRole.setEnabled(true);
+            holder.btnMore.setVisibility(View.VISIBLE);
+            // Handle PopupMenu
+            holder.btnMore.setOnClickListener(v -> {
+                PopupMenu popupMenu = new PopupMenu(context, holder.btnMore);
+                popupMenu.getMenu().add("Cập nhật");
+                popupMenu.getMenu().add("Xóa");
 
-            popupMenu.setOnMenuItemClickListener(item -> {
-                String title = item.getTitle().toString();
-                if (title.equals("Cập nhật")) {
-                    String newRole = holder.spinnerRole.getSelectedItem().toString();
-                    actionListener.onUpdateMember(member, newRole);
-                } else if (title.equals("Xóa")) {
-                    actionListener.onDeleteMember(member);
-                }
-                return true;
+                popupMenu.setOnMenuItemClickListener(item -> {
+                    String title = item.getTitle().toString();
+                    if (title.equals("Cập nhật")) {
+                        String newRole = holder.spinnerRole.getSelectedItem().toString();
+                        actionListener.onUpdateMember(member, newRole);
+                    } else if (title.equals("Xóa")) {
+                        actionListener.onDeleteMember(member);
+                    }
+                    return true;
+                });
+
+                popupMenu.show();
             });
-
-            popupMenu.show();
-        });
+        }
     }
 
     @Override

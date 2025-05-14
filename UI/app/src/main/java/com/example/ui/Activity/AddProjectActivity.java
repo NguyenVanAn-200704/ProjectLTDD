@@ -48,14 +48,14 @@ public class AddProjectActivity extends AppCompatActivity implements MemberAdapt
         setContentView(R.layout.activity_add_project);
         mapping();
 
-        // Initialize member adapter with context
-        memberAdapter = new MemberAdapter(this, memberList, this);
+        int userId = getSharedPreferences("UserPreferences", MODE_PRIVATE).getInt("userId", -1);
+
+        memberAdapter = new MemberAdapter(this, memberList, userId,userId,this);
         buttonAddProject.setOnClickListener(v -> {
             if (editTextName.getText().toString().isEmpty() ||
                     editTextDescription.getText().toString().isEmpty()) {
                 Toast.makeText(AddProjectActivity.this, "Vui lòng nhập đầy đủ thông tin!", Toast.LENGTH_SHORT).show();
             } else {
-                int userId = getSharedPreferences("UserPreferences", MODE_PRIVATE).getInt("userId", -1);
                 if (userId == -1) {
                     Intent intent = new Intent(AddProjectActivity.this, LoginActivity.class);
                     startActivity(intent);

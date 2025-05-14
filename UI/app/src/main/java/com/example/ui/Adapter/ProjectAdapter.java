@@ -5,6 +5,7 @@ import static android.content.Context.MODE_PRIVATE;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -12,8 +13,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.ui.Activity.HomePageActivity;
-import com.example.ui.Activity.LoginActivity;
 import com.example.ui.Activity.ProjectDetailsActivity;
 import com.example.ui.Model.Project;
 import com.example.ui.R;
@@ -24,18 +23,24 @@ import java.util.List;
 import java.util.Map;
 
 import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-public class ProjectAdapter {
+public abstract class ProjectAdapter {
 
     private Context context;
     private List<Project> projectList;
     private LinearLayout container;
+    private int userId;
 
-    public ProjectAdapter(Context context, List<Project> projectList, LinearLayout container) {
+    public ProjectAdapter(Context context, List<Project> projectList, LinearLayout container, int userId) {
         this.context = context;
         this.projectList = projectList;
         this.container = container;
+        this.userId = userId;
     }
+
+    public abstract void onProjectClick(Project project);
 
     public void loadProjects() {
         container.removeAllViews();
@@ -51,51 +56,52 @@ public class ProjectAdapter {
             tvName.setText(project.getName());
             tvMember.setText(project.getMemberCount() + " members");
 
+            // Chỉ hiển thị nút xóa nếu userId trùng với createBy
+            if (project.getCreateBy() == userId) {
+                ivDelete.setVisibility(View.VISIBLE);
+            } else {
+                ivDelete.setVisibility(View.GONE);
+            }
+
             itemView.setOnClickListener(v -> {
                 int projectId = project.getId();
+                int currentUserId = context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
+                        .getInt("userId", -1);
 
-                int userId = context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
-                        .getInt("userId", -1); // Lấy userId từ SharedPreferences
-
-                if (userId == -1) {
+                if (currentUserId == -1) {
                     Toast.makeText(context, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 APIService apiService = RetrofitCilent.getRetrofit().create(APIService.class);
-                Call<Map<String, Object>> call = apiService.getUserRole(projectId, userId);
+                Call<Map<String, Object>> call = apiService.getUserRole(projectId, currentUserId);
 
-                call.enqueue(new retrofit2.Callback<Map<String, Object>>() {
+                call.enqueue(new Callback<Map<String, Object>>() {
                     @Override
-                    public void onResponse(Call<Map<String, Object>> call, retrofit2.Response<Map<String, Object>> response) {
+                    public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             Map<String, Object> data = response.body();
                             String role = (String) data.get("role");
 
-                            // Lưu projectId nếu cần
-                            context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
-                                    .edit()
-                                    .putInt("projectId", projectId)
-                                    .apply();
-
-                            // Mở ProjectDetailsActivity
                             Intent intent = new Intent(context, ProjectDetailsActivity.class);
+                            intent.putExtra("projectId", project.getId());
                             intent.putExtra("projectName", project.getName());
-                            intent.putExtra("role", role); // truyền role vào intent
+                            intent.putExtra("projectCreatorId", project.getCreateBy());
+                            intent.putExtra("role", role);
                             context.startActivity(intent);
                         } else {
-                            Toast.makeText(context, "Không lấy được vai trò người dùng", Toast.LENGTH_SHORT).show();
+                            Log.e("ProjectAdapter", "Get role failed: " + response.code());
+                            Toast.makeText(context, "Không lấy được vai trò người dùng: " + response.code(), Toast.LENGTH_SHORT).show();
                         }
                     }
 
                     @Override
                     public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                        Toast.makeText(context, "Lỗi kết nối đến server!", Toast.LENGTH_SHORT).show();
-                        t.printStackTrace();
+                        Log.e("ProjectAdapter", "Get role error: " + t.getMessage());
+                        Toast.makeText(context, "Lỗi kết nối đến server: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
             });
-
 
             ivDelete.setOnClickListener(v -> {
                 new AlertDialog.Builder(context)
@@ -105,22 +111,23 @@ public class ProjectAdapter {
                             APIService apiService = RetrofitCilent.getRetrofit().create(APIService.class);
                             Call<Map<String, Object>> call = apiService.deleteProject(project.getId());
 
-                            call.enqueue(new retrofit2.Callback<Map<String, Object>>() {
+                            call.enqueue(new Callback<Map<String, Object>>() {
                                 @Override
-                                public void onResponse(Call<Map<String, Object>> call, retrofit2.Response<Map<String, Object>> response) {
+                                public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                                     if (response.isSuccessful() && response.body() != null) {
                                         Toast.makeText(context, "Đã xóa dự án: " + project.getName(), Toast.LENGTH_SHORT).show();
                                         projectList.remove(project);
-                                        loadProjects(); // reload lại giao diện
+                                        loadProjects();
                                     } else {
-                                        Toast.makeText(context, "Xóa thất bại!", Toast.LENGTH_SHORT).show();
+                                        Log.e("ProjectAdapter", "Delete project failed: " + response.code());
+                                        Toast.makeText(context, "Xóa thất bại: " + response.code(), Toast.LENGTH_SHORT).show();
                                     }
                                 }
 
                                 @Override
                                 public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                                    Toast.makeText(context, "Lỗi kết nối API!", Toast.LENGTH_SHORT).show();
-                                    t.printStackTrace();
+                                    Log.e("ProjectAdapter", "Delete project error: " + t.getMessage());
+                                    Toast.makeText(context, "Lỗi kết nối API: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                                 }
                             });
                         })

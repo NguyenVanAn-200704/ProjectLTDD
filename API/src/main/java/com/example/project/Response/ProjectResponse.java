@@ -8,5 +8,6 @@ import lombok.Data;
 public class ProjectResponse {
   private Integer id;
   private String name;
+  private int createBy;
   private int memberCount;
 }

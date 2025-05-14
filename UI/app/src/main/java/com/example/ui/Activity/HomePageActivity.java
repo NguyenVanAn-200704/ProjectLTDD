@@ -2,6 +2,7 @@ package com.example.ui.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -9,9 +10,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.ui.Adapter.ProjectAdapter;
 import com.example.ui.Model.Project;
 import com.example.ui.R;
+import com.example.ui.Adapter.ProjectAdapter;
 import com.example.ui.Retrofit.APIService;
 import com.example.ui.Retrofit.RetrofitCilent;
 
@@ -24,6 +25,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class HomePageActivity extends AppCompatActivity {
+
     private LinearLayout projectListContainer;
     private List<Project> projectList;
 
@@ -32,6 +34,8 @@ public class HomePageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
         projectListContainer = findViewById(R.id.projectListContainer);
+        projectList = new ArrayList<>();
+
         int userId = getSharedPreferences("UserPreferences", MODE_PRIVATE).getInt("userId", -1);
         if (userId == -1) {
             Intent intent = new Intent(HomePageActivity.this, LoginActivity.class);
@@ -45,6 +49,7 @@ public class HomePageActivity extends AppCompatActivity {
     }
 
     private void fetchProjectsFromAPI(Integer userId) {
+        Log.d("HomePage", "Fetching projects for userId: " + userId);
         APIService apiService = RetrofitCilent.getRetrofit().create(APIService.class);
         Call<Map<String, Object>> call = apiService.allProjects(userId);
 
@@ -52,23 +57,39 @@ public class HomePageActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<Project> projects = new ArrayList<>();
                     List<Map<String, Object>> data = (List<Map<String, Object>>) response.body().get("data");
+                    Log.d("HomePage", "Projects count: " + data.size());
 
+                    projectList.clear();
                     for (Map<String, Object> item : data) {
-                        Integer id = ((Double) item.get("id")).intValue(); // JSON number -> Double
+                        Integer id = ((Double) item.get("id")).intValue();
                         String name = (String) item.get("name");
+                        Integer createBy = ((Number) item.get("createBy")).intValue();
                         int memberCount = ((Double) item.get("memberCount")).intValue();
-                        projects.add(new Project(id, name, memberCount));
+                        projectList.add(new Project(id, createBy, name, memberCount));
                     }
-                    ProjectAdapter adapter = new ProjectAdapter(HomePageActivity.this, projects, projectListContainer);
+
+                    if (projectList.isEmpty()) {
+                        Toast.makeText(HomePageActivity.this, "Không có dự án nào", Toast.LENGTH_SHORT).show();
+                    }
+
+                    ProjectAdapter adapter = new ProjectAdapter(HomePageActivity.this, projectList, projectListContainer, userId) {
+                        @Override
+                        public void onProjectClick(Project project) {
+                            // Không cần override vì logic được xử lý trong ProjectAdapter
+                        }
+                    };
                     adapter.loadProjects();
+                } else {
+                    Log.e("HomePage", "Projects API failed: " + response.code());
+                    Toast.makeText(HomePageActivity.this, "Lỗi lấy danh sách dự án: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                t.printStackTrace();
+                Log.e("HomePage", "Projects API error: " + t.getMessage());
+                Toast.makeText(HomePageActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

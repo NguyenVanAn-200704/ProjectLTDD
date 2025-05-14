@@ -2,6 +2,7 @@ package com.example.project.Entity;
 
 import com.example.project.Enum.ProjectStatus;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -39,11 +40,11 @@ public class Project implements Serializable {
   LocalDate createAt;
 
   @OneToMany(mappedBy = "project")
-  @JsonManagedReference
+  @JsonIgnore
   List<ProjectMember> projectMembers;
 
   @OneToMany(mappedBy = "project")
-  @JsonManagedReference
+  @JsonIgnore
   List<Task> tasks;
 
   @PrePersist

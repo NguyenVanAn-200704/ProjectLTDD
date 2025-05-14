@@ -175,7 +175,8 @@ public class AddTaskActivity extends AppCompatActivity implements UploadTask.OnT
                         String email = (String) item.get("email");
                         String role = (String) item.get("role");
                         String avatar = (String) item.get("avatar");
-                        memberList.add(new Member(id, email, role, avatar));
+                        Integer userId = ((Number) item.get("userId")).intValue();
+                        memberList.add(new Member(id,userId, email, role, avatar));
                     }
                     adapter.notifyDataSetChanged();
                 } else {

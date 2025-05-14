@@ -30,15 +30,16 @@ public class ProjectMemberService {
   private final ProjectRepository projectRepository;
   private final UserRepository userRepository;
   private final TaskRepository taskRepository;
+  private final EmailService emailService;
 
   @Transactional
   public ResponseEntity<Map<String, Object>> addProjectMember(ProjectMemberRequest projectMemberRequest) {
     Map<String, Object> response = new HashMap<>();
     try {
       Project project = projectRepository.findById(projectMemberRequest.getProjectId()).orElseThrow(
-        () -> new RuntimeException("Project not found"));
+              () -> new RuntimeException("Project not found"));
       User user = userRepository.findByEmail(projectMemberRequest.getEmail()).orElseThrow(
-        () -> new RuntimeException("User not found"));
+              () -> new RuntimeException("User not found"));
       Optional<ProjectMember> existing = projectMemberRepository.findByProjectAndUser(project, user);
       if (existing.isPresent()) {
         response.put("status", HttpStatus.BAD_REQUEST.value());
@@ -47,11 +48,24 @@ public class ProjectMemberService {
       }
       ProjectRole role = ProjectRole.valueOf(projectMemberRequest.getRole().toUpperCase());
       ProjectMember projectMember = ProjectMember.builder()
-        .project(project)
-        .user(user)
-        .role(role)
-        .build();
+              .project(project)
+              .user(user)
+              .role(role)
+              .build();
       projectMemberRepository.save(projectMember);
+
+      // Gửi email thông báo cho người dùng được thêm
+      String subject = "Bạn được thêm vào một Dự án mới";
+      String body = String.format(
+              "Chào %s,\n\nBạn vừa được thêm vào dự án %s với vai trò %s.\n\n" +
+                      "Vui lòng kiểm tra và bắt đầu tham gia dự án.\n" +
+                      "Trân trọng,\nHệ thống quản lý dự án",
+              user.getName() != null ? user.getName() : user.getEmail(),
+              project.getName(),
+              role.toString()
+      );
+      emailService.sendEmail(user.getEmail(), subject, body);
+
       response.put("status", HttpStatus.CREATED.value());
       response.put("message", "Thêm thành viên thành công");
       return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -62,18 +76,27 @@ public class ProjectMemberService {
     }
   }
 
+  // Phương thức addTask giữ nguyên, không cần sửa
+
   @Transactional
-  public ResponseEntity<Map<String, Object>> updateProjectMember(UpdateProjectMemberRequest updateProjectMemberRequest) {
+  public ResponseEntity<Map<String, Object>> updateMemberRole(UpdateProjectMemberRequest updateProjectMemberRequest) {
     Map<String, Object> response = new HashMap<>();
     try {
-      ProjectMember projectMember = projectMemberRepository.findById(updateProjectMemberRequest.getId()).orElseThrow(
-        () -> new RuntimeException("Project not found: " + updateProjectMemberRequest.getId())
-      );
-      projectMember.setRole(ProjectRole.valueOf(updateProjectMemberRequest.getRole().toUpperCase()));
-      projectMemberRepository.save(projectMember);
+      ProjectMember member = projectMemberRepository.findById(updateProjectMemberRequest.getId())
+              .orElseThrow(() -> new RuntimeException("Member not found"));
+      Project project = member.getProject();
+      if (member.getRole() == ProjectRole.ADMIN && project.getCreateBy().getId() != updateProjectMemberRequest.getCurrentUserId()) {
+        response.put("status", HttpStatus.FORBIDDEN.value());
+        response.put("message", "Chỉ người tạo dự án có thể thay đổi vai trò của Admin");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+      }
+      ProjectRole oldRole = member.getRole();
+      member.setRole(ProjectRole.valueOf(updateProjectMemberRequest.getRole().toUpperCase()));
+      projectMemberRepository.save(member);
+
       response.put("status", HttpStatus.OK.value());
-      response.put("message", "Cập nhật project-member thành công");
-      return ResponseEntity.status(HttpStatus.OK).body(response);
+      response.put("message", "Cập nhật vai trò thành công");
+      return ResponseEntity.ok(response);
     } catch (Exception e) {
       response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
       response.put("message", "Lỗi: " + e.getMessage());
@@ -130,6 +153,7 @@ public class ProjectMemberService {
               .map(pm -> {
                 Map<String, Object> memberInfo = new HashMap<>();
                 memberInfo.put("id", pm.getId());
+                memberInfo.put("userId", pm.getUser().getId());
                 memberInfo.put("email", pm.getUser().getEmail());
                 memberInfo.put("role", pm.getRole().toString());
                 memberInfo.put("avatar", pm.getUser().getAvatar()); // Thêm thông tin avatar
