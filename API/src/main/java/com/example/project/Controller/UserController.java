@@ -1,9 +1,6 @@
 package com.example.project.Controller;
 
-import com.example.project.Request.EmailOTPRequest;
-import com.example.project.Request.LoginRequest;
-import com.example.project.Request.UpdateUserRequest;
-import com.example.project.Request.UserRequest;
+import com.example.project.Request.*;
 import com.example.project.Service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -39,8 +36,8 @@ public class UserController {
   }
 
   @PostMapping("/verify-otp")
-  ResponseEntity<Map<String, Object>> verifyOTP(@Valid @RequestBody EmailOTPRequest emailOTPRequest) {
-    return userService.verifyOTP(emailOTPRequest);
+  ResponseEntity<Map<String, Object>> verifyOTP(@Valid @RequestBody VerifyOTPRequest verifyOTPRequest) {
+    return userService.verifyOTP(verifyOTPRequest);
   }
 
   @PostMapping("/reset-password")
