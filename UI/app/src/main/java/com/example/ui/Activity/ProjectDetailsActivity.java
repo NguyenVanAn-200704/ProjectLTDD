@@ -1,7 +1,10 @@
 package com.example.ui.Activity;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -22,33 +25,39 @@ import com.example.ui.Model.Member;
 import com.example.ui.Model.Task;
 import com.example.ui.Model.User;
 import com.example.ui.R;
+import com.example.ui.Request.UpdateProjectMemberRequest;
 import com.example.ui.Retrofit.APIService;
 import com.example.ui.Retrofit.RetrofitCilent;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
-import org.json.JSONObject;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ProjectDetailsActivity extends AppCompatActivity {
+public class ProjectDetailsActivity extends AppCompatActivity implements MemberAdapter.OnMemberActionListener {
 
     private RecyclerView taskListContainer;
     private List<Task> taskList = new ArrayList<>();
+    private List<Task> filteredTaskList = new ArrayList<>();
     private List<Member> memberList = new ArrayList<>();
     private MemberAdapter memberAdapter;
-    private Button btnAddMember;
-
+    private TaskAdapter taskAdapter;
+    private Button btnAddMember, btnNewProject;
+    private ImageButton btnSearch, btnFilter;
+    private TextInputEditText edtSearchTask;
     private int projectId;
+    private String currentSearchQuery = "";
+    private String selectedStatus = "";
+    private String selectedPriority = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,8 +66,13 @@ public class ProjectDetailsActivity extends AppCompatActivity {
 
         taskListContainer = findViewById(R.id.recyclerTasks);
         btnAddMember = findViewById(R.id.btnAddMemberDialog);
+        btnNewProject = findViewById(R.id.btnNewTask);
+        btnSearch = findViewById(R.id.btnSearch);
+        btnFilter = findViewById(R.id.btnFilter);
+        edtSearchTask = findViewById(R.id.edtSearchTask);
 
-        memberAdapter = new MemberAdapter(this, memberList);
+        // Khởi tạo MemberAdapter với callback
+        memberAdapter = new MemberAdapter(this, memberList, this);
 
         int userId = getSharedPreferences("UserPreferences", MODE_PRIVATE).getInt("userId", -1);
         projectId = getSharedPreferences("UserPreferences", MODE_PRIVATE).getInt("projectId", -1);
@@ -75,13 +89,24 @@ public class ProjectDetailsActivity extends AppCompatActivity {
         TextView tvProjectTitle = findViewById(R.id.tvProjectTitle);
         tvProjectTitle.setText(projectName);
 
-
-        RecyclerView recyclerView = findViewById(R.id.recyclerTasks);
-        TaskAdapter taskAdapter = new TaskAdapter(taskList);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(taskAdapter);
+        // Khởi tạo RecyclerView và TaskAdapter
+        filteredTaskList.addAll(taskList); // Ban đầu hiển thị toàn bộ task
+        taskAdapter = new TaskAdapter(filteredTaskList);
+        taskListContainer.setLayoutManager(new LinearLayoutManager(this));
+        taskListContainer.setAdapter(taskAdapter);
 
         btnAddMember.setOnClickListener(v -> showAddMemberDialog());
+        btnNewProject.setOnClickListener(v -> {
+            Intent intent = new Intent(ProjectDetailsActivity.this, AddTaskActivity.class);
+            intent.putExtra("projectId", projectId);
+            intent.putExtra("userId", userId);
+            startActivityForResult(intent, 123);
+        });
+
+        // Xử lý tìm kiếm
+        setupSearch();
+        // Xử lý filter
+        setupFilter();
 
         navigation();
     }
@@ -92,32 +117,41 @@ public class ProjectDetailsActivity extends AppCompatActivity {
 
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
-            public void onResponse(Call<Map<String, Object>> call, retrofit2.Response<Map<String, Object>> response) {
+            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     Map<String, Object> responseBody = response.body();
                     if (responseBody.containsKey("tasks")) {
                         List<Map<String, Object>> data = (List<Map<String, Object>>) responseBody.get("tasks");
 
-                        taskList.clear(); // Xóa dữ liệu cũ nếu có
-
+                        taskList.clear();
+                        filteredTaskList.clear();
                         for (Map<String, Object> taskMap : data) {
+                            Number idNumber = (Number) taskMap.get("id");
+                            int id = idNumber.intValue();
                             String title = (String) taskMap.get("title");
                             String status = (String) taskMap.get("status");
+                            String priority = (String) taskMap.get("priority"); // Giả sử API trả về priority
                             String dueDateStr = (String) taskMap.get("dueDate");
 
-                            Map<String, String> userMap = (Map<String, String>) taskMap.get("user");
-                            String userName = userMap.get("name");
+                            // Parse user (khôi phục logic Assign)
+                            User assignedUser = null;
+                            Map<String, Object> userMap = (Map<String, Object>) taskMap.get("user");
+                            if (userMap != null) {
+                                Integer userId = userMap.get("id") != null ? ((Number) userMap.get("id")).intValue() : null;
+                                String userName = (String) userMap.get("name");
+                                String userEmail = (String) userMap.get("email");
+                                if (userId != null && userName != null && userEmail != null) {
+                                    assignedUser = new User(userName, userEmail, userId);
+                                }
+                            }
 
                             LocalDate dueDate = LocalDate.parse(dueDateStr);
-                            Task task = new Task(dueDate, new User(userName), status, title);
+                            Task task = new Task(id, dueDate, assignedUser, status, title, priority);
                             taskList.add(task);
                         }
 
-                        // Cập nhật RecyclerView
-                        RecyclerView recyclerView = findViewById(R.id.recyclerTasks);
-                        TaskAdapter adapter = new TaskAdapter(taskList);
-                        recyclerView.setLayoutManager(new LinearLayoutManager(ProjectDetailsActivity.this));
-                        recyclerView.setAdapter(adapter);
+                        // Cập nhật danh sách hiển thị
+                        applyFilters();
                     }
                 } else {
                     Toast.makeText(ProjectDetailsActivity.this, "Lỗi lấy danh sách task", Toast.LENGTH_SHORT).show();
@@ -131,13 +165,101 @@ public class ProjectDetailsActivity extends AppCompatActivity {
         });
     }
 
+    private void setupSearch() {
+        edtSearchTask.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                currentSearchQuery = s.toString().trim();
+                applyFilters();
+            }
+        });
+
+        btnSearch.setOnClickListener(v -> applyFilters());
+    }
+
+    private void setupFilter() {
+        btnFilter.setOnClickListener(v -> showFilterDialog());
+    }
+
+    private void showFilterDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_filter_tasks, null);
+        builder.setView(dialogView);
+
+        Spinner spinnerStatus = dialogView.findViewById(R.id.spinnerStatus);
+        Spinner spinnerPriority = dialogView.findViewById(R.id.spinnerPriority);
+        Button btnApplyFilter = dialogView.findViewById(R.id.btnApplyFilter);
+
+        // Thiết lập spinner trạng thái
+        List<String> statusList = Arrays.asList("", "TO_DO", "IN_PROGRESS", "DONE");
+        ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, statusList);
+        statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerStatus.setAdapter(statusAdapter);
+        spinnerStatus.setSelection(statusList.indexOf(selectedStatus));
+
+        // Thiết lập spinner ưu tiên
+        List<String> priorityList = Arrays.asList("", "LOW", "MEDIUM", "HIGH");
+        ArrayAdapter<String> priorityAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, priorityList);
+        priorityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerPriority.setAdapter(priorityAdapter);
+        spinnerPriority.setSelection(priorityList.indexOf(selectedPriority));
+
+        AlertDialog dialog = builder.create();
+
+        btnApplyFilter.setOnClickListener(v -> {
+            selectedStatus = spinnerStatus.getSelectedItem().toString();
+            selectedPriority = spinnerPriority.getSelectedItem().toString();
+            applyFilters();
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+
+    private void applyFilters() {
+        filteredTaskList.clear();
+        List<Task> tempList = taskList;
+
+        // Lọc theo tìm kiếm
+        if (!currentSearchQuery.isEmpty()) {
+            String query = currentSearchQuery.toLowerCase();
+            tempList = tempList.stream()
+                    .filter(task -> task.getTitle().toLowerCase().contains(query))
+                    .collect(Collectors.toList());
+        }
+
+        // Lọc theo trạng thái
+        if (!selectedStatus.isEmpty()) {
+            tempList = tempList.stream()
+                    .filter(task -> task.getStatus().equals(selectedStatus))
+                    .collect(Collectors.toList());
+        }
+
+        // Lọc theo ưu tiên
+        if (!selectedPriority.isEmpty()) {
+            tempList = tempList.stream()
+                    .filter(task -> task.getPriority() != null && task.getPriority().equals(selectedPriority))
+                    .collect(Collectors.toList());
+        }
+
+        filteredTaskList.addAll(tempList);
+        taskAdapter.notifyDataSetChanged();
+    }
+
     private void showAddMemberDialog() {
         BottomSheetDialog dialog = new BottomSheetDialog(this);
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_member, null);
         dialog.setContentView(dialogView);
         View parentLayout = dialogView.getParent() instanceof View ? (View) dialogView.getParent() : null;
         if (parentLayout != null) {
-            parentLayout.getLayoutParams().height = (int) (getResources().getDisplayMetrics().heightPixels * 0.9); // Chiếm 85% chiều cao màn hình
+            parentLayout.getLayoutParams().height = (int) (getResources().getDisplayMetrics().heightPixels * 0.9);
         }
 
         TextInputEditText edtEmail = dialogView.findViewById(R.id.edtEmail);
@@ -148,42 +270,22 @@ public class ProjectDetailsActivity extends AppCompatActivity {
         ProgressBar progressBar = dialogView.findViewById(R.id.progressBar);
 
         // Setup Spinner
-        List<String> roles = Arrays.asList("Admin", "Member", "Viewer");
+        List<String> roles = Arrays.asList("ADMIN", "MEMBER", "VIEWER");
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, roles);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerRole.setAdapter(spinnerAdapter);
+        spinnerRole.setSelection(1); // Mặc định chọn "MEMBER"
 
         // Setup RecyclerView
         recyclerMembers.setLayoutManager(new LinearLayoutManager(this));
         recyclerMembers.setAdapter(memberAdapter);
 
-        APIService apiService = RetrofitCilent.getRetrofit().create(APIService.class);
-        Call<Map<String, Object>> memberCall = apiService.getAllMember(projectId);
-        memberCall.enqueue(new Callback<Map<String, Object>>() {
-            @Override
-            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Map<String, Object>> data = (List<Map<String, Object>>) response.body().get("members");
-                    memberList.clear();
-                    for (Map<String, Object> item : data) {
-                        String email = (String) item.get("email");
-                        String role = (String) item.get("role");
-                        String avatar = (String) item.get("avatar"); // nếu có
-                        memberList.add(new Member(email, role, avatar));
-                    }
-                    memberAdapter.notifyDataSetChanged();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                Toast.makeText(ProjectDetailsActivity.this, "Không thể tải danh sách thành viên", Toast.LENGTH_SHORT).show();
-            }
-        });
+        // Load danh sách thành viên
+        loadMember();
 
         btnAddMemberDialog.setOnClickListener(v -> {
             String email = edtEmail.getText().toString().trim();
-            String role = spinnerRole.getSelectedItem().toString();
+            String role = spinnerRole.getSelectedItem() != null ? spinnerRole.getSelectedItem().toString() : "MEMBER";
 
             if (email.isEmpty() || !email.contains("@") || !email.contains(".")) {
                 tilEmail.setError("Vui lòng nhập email hợp lệ!");
@@ -194,7 +296,7 @@ public class ProjectDetailsActivity extends AppCompatActivity {
             progressBar.setVisibility(View.VISIBLE);
             btnAddMemberDialog.setEnabled(false);
 
-            // Bước 1: Kiểm tra email tồn tại
+            APIService apiService = RetrofitCilent.getRetrofit().create(APIService.class);
             Call<Map<String, Object>> checkCall = apiService.checkUserByEmail(email);
             checkCall.enqueue(new Callback<Map<String, Object>>() {
                 @Override
@@ -204,10 +306,7 @@ public class ProjectDetailsActivity extends AppCompatActivity {
                         int status = ((Number) responseBody.get("status")).intValue();
 
                         if (status == 200) {
-                            Map<String, Object> userData = (Map<String, Object>) responseBody.get("data");
-
-                            // Bước 2: Thêm thành viên vào project
-                            Call<Map<String, Object>> addCall = apiService.addMember(new Member(projectId,email,role));
+                            Call<Map<String, Object>> addCall = apiService.addMember(new Member(projectId, email, role));
                             addCall.enqueue(new Callback<Map<String, Object>>() {
                                 @Override
                                 public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
@@ -217,7 +316,7 @@ public class ProjectDetailsActivity extends AppCompatActivity {
                                     if (response.isSuccessful() && response.body() != null) {
                                         Toast.makeText(ProjectDetailsActivity.this, "Thêm thành viên thành công!", Toast.LENGTH_SHORT).show();
                                         edtEmail.setText("");
-                                        loadMember(); // Load lại danh sách
+                                        loadMember();
                                     } else {
                                         Toast.makeText(ProjectDetailsActivity.this, "Lỗi khi thêm thành viên vào project", Toast.LENGTH_SHORT).show();
                                     }
@@ -230,13 +329,11 @@ public class ProjectDetailsActivity extends AppCompatActivity {
                                     Toast.makeText(ProjectDetailsActivity.this, "Lỗi kết nối khi thêm thành viên", Toast.LENGTH_SHORT).show();
                                 }
                             });
-
                         } else {
                             progressBar.setVisibility(View.GONE);
                             btnAddMemberDialog.setEnabled(true);
                             String message = responseBody.get("message").toString();
                             tilEmail.setError(message);
-                            Toast.makeText(ProjectDetailsActivity.this, "Lỗi: " + message, Toast.LENGTH_SHORT).show();
                         }
                     } else {
                         progressBar.setVisibility(View.GONE);
@@ -257,13 +354,88 @@ public class ProjectDetailsActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    void loadMember() {
+    private void loadMember() {
+        APIService apiService = RetrofitCilent.getRetrofit().create(APIService.class);
+        Call<Map<String, Object>> memberCall = apiService.getAllMember(projectId);
+        memberCall.enqueue(new Callback<Map<String, Object>>() {
+            @Override
+            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Map<String, Object>> data = (List<Map<String, Object>>) response.body().get("members");
+                    memberList.clear();
+                    for (Map<String, Object> item : data) {
+                        Integer id = ((Number) item.get("id")).intValue();
+                        String email = (String) item.get("email");
+                        String role = (String) item.get("role");
+                        String avatar = (String) item.get("avatar");
+                        memberList.add(new Member(id, email, role, avatar));
+                    }
+                    memberAdapter.notifyDataSetChanged();
+                }
+            }
 
+            @Override
+            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                Toast.makeText(ProjectDetailsActivity.this, "Không thể tải danh sách thành viên", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    void checkMember()
-    {
+    @Override
+    public void onUpdateMember(Member member, String newRole) {
+        APIService apiService = RetrofitCilent.getRetrofit().create(APIService.class);
+        UpdateProjectMemberRequest request = new UpdateProjectMemberRequest(member.getId(), newRole);
+        Call<Map<String, Object>> updateCall = apiService.updateMember(request);
+        updateCall.enqueue(new Callback<Map<String, Object>>() {
+            @Override
+            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Toast.makeText(ProjectDetailsActivity.this, "Cập nhật thành viên thành công!", Toast.LENGTH_SHORT).show();
+                    loadMember();
+                } else {
+                    Toast.makeText(ProjectDetailsActivity.this, "Lỗi khi cập nhật thành viên", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                Toast.makeText(ProjectDetailsActivity.this, "Lỗi kết nối khi cập nhật: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
+    @Override
+    public void onDeleteMember(Member member) {
+        APIService apiService = RetrofitCilent.getRetrofit().create(APIService.class);
+        Call<Map<String, Object>> deleteCall = apiService.deleteMember(member.getId());
+        deleteCall.enqueue(new Callback<Map<String, Object>>() {
+            @Override
+            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Toast.makeText(ProjectDetailsActivity.this, "Xóa thành viên thành công!", Toast.LENGTH_SHORT).show();
+                    loadMember();
+                } else {
+                    Toast.makeText(ProjectDetailsActivity.this, "Lỗi khi xóa thành viên", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                Toast.makeText(ProjectDetailsActivity.this, "Lỗi kết nối khi xóa: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 123 && resultCode == RESULT_OK) {
+            fetchTasksFromAPI(projectId);
+        }
+    }
+
+    @Override
+    public void onTaskUploadFailure(String errorMessage) {
+        Toast.makeText(this, "Tải file thất bại: " + errorMessage, Toast.LENGTH_SHORT).show();
     }
 
     void navigation() {

@@ -47,6 +47,9 @@ public class Task implements Serializable {
 
   LocalDate createdDate;
 
+  @Column
+  private String fileUrl;
+
   @PrePersist
   protected void onCreate() {
     this.status = TaskStatus.TO_DO;

@@ -126,24 +126,33 @@ public class ProjectService {
 
     try {
       User user = userRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("User not found"));
-      List<Project> projects = projectRepository.findByCreateBy(user);
-      List<ProjectResponse> projectResponses = projects.stream()
-        .map(project -> new ProjectResponse(
-          project.getId(),
-          project.getName(),
-          project.getProjectMembers() != null ? project.getProjectMembers().size() : 0
-        ))
-        .collect(Collectors.toList());
+              .orElseThrow(() -> new RuntimeException("User not found"));
+
+      // Lấy tất cả project mà user đang tham gia (dù là creator hay member)
+      List<ProjectMember> projectMembers = projectMemberRepository.findByUser(user);
+
+      List<ProjectResponse> projectResponses = projectMembers.stream()
+              .map(pm -> {
+                Project project = pm.getProject();
+                return new ProjectResponse(
+                        project.getId(),
+                        project.getName(),
+                        project.getProjectMembers() != null ? project.getProjectMembers().size() : 0
+                );
+              })
+              .collect(Collectors.toList());
+
       response.put("status", HttpStatus.OK.value());
       response.put("data", projectResponses);
       return ResponseEntity.ok(response);
+
     } catch (Exception e) {
       response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
       response.put("message", "Lỗi: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
   }
+
 
   @Transactional
   public ResponseEntity<Map<String, Object>> allTasksInProject(Integer id) {

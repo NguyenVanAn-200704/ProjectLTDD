@@ -30,4 +30,8 @@ public class TaskController {
   ResponseEntity<Map<String, Object>> deleteTask(@RequestParam Integer id) {
     return taskService.deleteTask(id);
   }
+
+  @GetMapping("/get")
+  ResponseEntity<Map<String, Object>> getTask(@RequestParam Integer id) { return taskService.findById(id);
+  }
 }

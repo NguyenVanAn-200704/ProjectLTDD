@@ -4,6 +4,9 @@ import com.example.ui.Model.Member;
 import com.example.ui.Request.CreateProjectRequest;
 import com.example.ui.Request.EmailOTPRequest;
 import com.example.ui.Request.LoginRequest;
+import com.example.ui.Request.TaskRequest;
+import com.example.ui.Request.UpdateProjectMemberRequest;
+import com.example.ui.Request.UpdateTaskRequest;
 import com.example.ui.Request.UpdateUserRequest;
 import com.example.ui.Request.UserRequest;
 
@@ -61,6 +64,22 @@ public interface APIService {
     @GET("/project/{projectId}/members")
     Call<Map<String, Object>> getAllMember(@Path("projectId") int projectId);
 
+    // Thêm API update member
+    @PUT("/project/member/update")
+    Call<Map<String, Object>> updateMember(@Body UpdateProjectMemberRequest updateMemberRequest);
+
+    // Thêm API delete member
+    @DELETE("/project/member/delete")
+    Call<Map<String, Object>> deleteMember(@Query("id") Integer id);
+
+    @POST("/project/task/add")
+    Call<Map<String, Object>> addTask(@Body TaskRequest taskRequest);
+
+    @PUT("/project/task/update")
+    Call<Map<String, Object>> updateTask(@Body UpdateTaskRequest updateTaskRequest);
+
+    @GET("/project/task/get")
+    Call<Map<String,Object>> getTaskById(@Query("id") int id);
     @DELETE("/project/delete")
     Call<Map<String, Object>> deleteProject(@Query("id") Integer id);
 }

@@ -112,7 +112,7 @@
             android:fillViewport="true"
             android:scrollbars="none">
 
-            <LinearLayout
+            <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/taskListContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

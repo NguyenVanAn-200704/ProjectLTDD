@@ -12,6 +12,12 @@ public class User {
     private List<ProjectMember> projectMembers;
     private List<TaskTemp> tasks;
 
+    public User( String name, String email, Integer id) {
+        this.name = name;
+        this.email = email;
+        this.id = id;
+    }
+
     public User(String name){
         this.name = name;
     }
