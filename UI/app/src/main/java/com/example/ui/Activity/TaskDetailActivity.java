@@ -1,5 +1,8 @@
 package com.example.ui.Activity;
 
+import static com.example.ui.Enum.ProjectRole.ADMIN;
+import static com.example.ui.Enum.ProjectRole.MEMBER;
+
 import android.app.DatePickerDialog;
 import android.app.DownloadManager;
 import android.app.ProgressDialog;
@@ -28,6 +31,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ui.Adapter.MemberAssignAdapter;
+import com.example.ui.Enum.ProjectRole;
 import com.example.ui.Enum.TaskPriority;
 import com.example.ui.Enum.TaskStatus;
 import com.example.ui.Model.Member;
@@ -60,6 +64,9 @@ public class TaskDetailActivity extends AppCompatActivity implements UploadTask.
     private Spinner spinnerTaskPriority, spinnerTaskStatus;
     private Button btnEdit, btnAddFile, btnAssign, btnClearAssign;
     private ImageView imgTaskIcon;
+
+    private int userId;
+    private String role;
     private Uri fileUri;
     private String fileUrl;
     private APIService apiService;
@@ -81,9 +88,11 @@ public class TaskDetailActivity extends AppCompatActivity implements UploadTask.
         anhxa();
         apiService = RetrofitCilent.getRetrofit().create(APIService.class);
         taskId = getIntent().getIntExtra("taskId", -1);
+        role = getIntent().getStringExtra("role");
+        userId = getIntent().getIntExtra("userId", -1);
 
-        if (taskId == -1) {
-            Toast.makeText(this, "Không tìm thấy ID task!", Toast.LENGTH_SHORT).show();
+        if (taskId == -1 || userId == -1) {
+            Toast.makeText(this, "Không tìm thấy ID task hoặc user!", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -93,6 +102,105 @@ public class TaskDetailActivity extends AppCompatActivity implements UploadTask.
         pickDateEvent();
         setupButtonListeners();
         fetchTaskDetails(taskId);
+    }
+
+    // Thêm phương thức applyRolePermissions
+    private void applyRolePermissions() {
+        ProjectRole projectRole;
+        try {
+            projectRole = role != null ? ProjectRole.valueOf(role) : ProjectRole.VIEWER;
+        } catch (IllegalArgumentException e) {
+            projectRole = ProjectRole.VIEWER;
+        }
+
+        switch (projectRole) {
+            case VIEWER:
+                // Ẩn tất cả button
+                btnAssign.setVisibility(View.GONE);
+                btnClearAssign.setVisibility(View.GONE);
+                btnAddFile.setVisibility(View.GONE);
+                btnEdit.setVisibility(View.GONE);
+                // Vô hiệu hóa tất cả input
+                edtTaskTitle.setEnabled(false);
+                edtTaskDescription.setEnabled(false);
+                edtTaskDue.setEnabled(false);
+                spinnerTaskPriority.setEnabled(false);
+                spinnerTaskStatus.setEnabled(false);
+                break;
+
+            case MEMBER:
+                // Kiểm tra xem user hiện tại có phải là assigned user không
+                Call<Map<String, Object>> userCall = apiService.profile(userId);
+                userCall.enqueue(new Callback<Map<String, Object>>() {
+                    @Override
+                    public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            Map<String, Object> userData = (Map<String, Object>) response.body().get("user");
+                            String userEmail = (String) userData.get("email");
+                            boolean isAssignedUser = assignedEmail != null && assignedEmail.equals(userEmail);
+
+                            if (isAssignedUser) {
+                                // Chỉ cho phép chỉnh sửa status và nút Save
+                                btnAssign.setVisibility(View.GONE);
+                                btnClearAssign.setVisibility(View.GONE);
+                                btnAddFile.setVisibility(View.GONE);
+                                btnEdit.setVisibility(View.VISIBLE);
+                                edtTaskTitle.setEnabled(false);
+                                edtTaskDescription.setEnabled(false);
+                                edtTaskDue.setEnabled(false);
+                                spinnerTaskPriority.setEnabled(false);
+                                spinnerTaskStatus.setEnabled(true);
+                            } else {
+                                // Tương tự VIEWER
+                                btnAssign.setVisibility(View.GONE);
+                                btnClearAssign.setVisibility(View.GONE);
+                                btnAddFile.setVisibility(View.GONE);
+                                btnEdit.setVisibility(View.GONE);
+                                edtTaskTitle.setEnabled(false);
+                                edtTaskDescription.setEnabled(false);
+                                edtTaskDue.setEnabled(false);
+                                spinnerTaskPriority.setEnabled(false);
+                                spinnerTaskStatus.setEnabled(false);
+                            }
+                        } else {
+                            Toast.makeText(TaskDetailActivity.this, "Lỗi khi lấy thông tin user!", Toast.LENGTH_SHORT).show();
+                            applyViewerPermissions();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                        Toast.makeText(TaskDetailActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        applyViewerPermissions();
+                    }
+                });
+                break;
+
+            case ADMIN:
+                // Toàn quyền
+                btnAssign.setVisibility(View.VISIBLE);
+                btnClearAssign.setVisibility(assignedEmail != null ? View.VISIBLE : View.GONE);
+                btnAddFile.setVisibility(View.VISIBLE);
+                btnEdit.setVisibility(View.VISIBLE);
+                edtTaskTitle.setEnabled(true);
+                edtTaskDescription.setEnabled(true);
+                edtTaskDue.setEnabled(true);
+                spinnerTaskPriority.setEnabled(true);
+                spinnerTaskStatus.setEnabled(true);
+                break;
+        }
+    }
+
+    private void applyViewerPermissions() {
+        btnAssign.setVisibility(View.GONE);
+        btnClearAssign.setVisibility(View.GONE);
+        btnAddFile.setVisibility(View.GONE);
+        btnEdit.setVisibility(View.GONE);
+        edtTaskTitle.setEnabled(false);
+        edtTaskDescription.setEnabled(false);
+        edtTaskDue.setEnabled(false);
+        spinnerTaskPriority.setEnabled(false);
+        spinnerTaskStatus.setEnabled(false);
     }
 
     private void anhxa() {
@@ -145,6 +253,7 @@ public class TaskDetailActivity extends AppCompatActivity implements UploadTask.
                     if (taskData != null) {
                         currentTask = mapTask(taskData);
                         populateTaskDetails(currentTask);
+                        applyRolePermissions();
                     } else {
                         Toast.makeText(TaskDetailActivity.this, "Không tìm thấy thông tin task!", Toast.LENGTH_SHORT).show();
                         finish();
@@ -258,45 +367,63 @@ public class TaskDetailActivity extends AppCompatActivity implements UploadTask.
     }
 
     private void updateTask() {
-        String title = edtTaskTitle.getText().toString().trim();
-        String description = edtTaskDescription.getText().toString().trim();
-        String priority = spinnerTaskPriority.getSelectedItem() != null ? spinnerTaskPriority.getSelectedItem().toString() : "";
-        String status = spinnerTaskStatus.getSelectedItem() != null ? spinnerTaskStatus.getSelectedItem().toString() : "";
-        String dueDateStr = edtTaskDue.getText().toString().trim();
-
-        if (title.isEmpty() || description.isEmpty() || dueDateStr.isEmpty()) {
-            hideProgress();
-            Toast.makeText(this, "Vui lòng điền đầy đủ thông tin!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        LocalDate dueDateLocal;
+        ProjectRole projectRole;
         try {
-            dueDateLocal = LocalDate.parse(dueDateStr, dateFormatter);
-        } catch (Exception e) {
-            hideProgress();
-            Toast.makeText(this, "Định dạng ngày không hợp lệ!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        String dueDateForBackend = dueDateLocal.format(isoDateFormatter);
-
-        Log.d("UpdateTask", "fileUrl before sending: " + fileUrl);
-        if (fileUri != null && fileUrl == null) {
-            hideProgress();
-            Toast.makeText(this, "File chưa được tải lên, vui lòng thử lại!", Toast.LENGTH_SHORT).show();
-            return;
+            projectRole = role != null ? ProjectRole.valueOf(role) : ProjectRole.VIEWER;
+        } catch (IllegalArgumentException e) {
+            projectRole = ProjectRole.VIEWER;
         }
 
-        UpdateTaskRequest updateRequest = new UpdateTaskRequest(
-                taskId,
-                title,
-                description,
-                status,
-                priority,
-                assignedEmail,
-                fileUrl,
-                dueDateForBackend
-        );
+        // Chỉ lấy các trường cần thiết dựa trên vai trò
+        String status = spinnerTaskStatus.getSelectedItem() != null ? spinnerTaskStatus.getSelectedItem().toString() : "";
+        UpdateTaskRequest updateRequest;
+
+        if (projectRole == ProjectRole.MEMBER) {
+            // MEMBER chỉ được cập nhật status
+            updateRequest = new UpdateTaskRequest(
+                    taskId,
+                    currentTask.getTitle(),
+                    currentTask.getDescription(),
+                    status,
+                    currentTask.getPriority(),
+                    assignedEmail,
+                    currentTask.getFileUrl(),
+                    currentTask.getDueDate() != null ? currentTask.getDueDate().format(isoDateFormatter) : null
+            );
+        } else {
+            // ADMIN hoặc fallback: lấy tất cả trường
+            String title = edtTaskTitle.getText().toString().trim();
+            String description = edtTaskDescription.getText().toString().trim();
+            String priority = spinnerTaskPriority.getSelectedItem() != null ? spinnerTaskPriority.getSelectedItem().toString() : "";
+            String dueDateStr = edtTaskDue.getText().toString().trim();
+
+            if (title.isEmpty() || description.isEmpty() || dueDateStr.isEmpty()) {
+                hideProgress();
+                Toast.makeText(this, "Vui lòng điền đầy đủ thông tin!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            LocalDate dueDateLocal;
+            try {
+                dueDateLocal = LocalDate.parse(dueDateStr, dateFormatter);
+            } catch (Exception e) {
+                hideProgress();
+                Toast.makeText(this, "Định dạng ngày không hợp lệ!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            String dueDateForBackend = dueDateLocal.format(isoDateFormatter);
+
+            updateRequest = new UpdateTaskRequest(
+                    taskId,
+                    title,
+                    description,
+                    status,
+                    priority,
+                    assignedEmail,
+                    fileUrl != null ? fileUrl : currentTask.getFileUrl(),
+                    dueDateForBackend
+            );
+        }
 
         showProgress("Updating task...");
         Call<Map<String, Object>> call = apiService.updateTask(updateRequest);
@@ -463,21 +590,33 @@ public class TaskDetailActivity extends AppCompatActivity implements UploadTask.
     }
 
     private void pickDateEvent() {
-        edtTaskDue.setOnClickListener(v -> {
-            final Calendar c = Calendar.getInstance();
-            int year = c.get(Calendar.YEAR);
-            int month = c.get(Calendar.MONTH);
-            int day = c.get(Calendar.DAY_OF_MONTH);
+        ProjectRole projectRole;
+        try {
+            projectRole = role != null ? ProjectRole.valueOf(role) : ProjectRole.VIEWER;
+        } catch (IllegalArgumentException e) {
+            projectRole = ProjectRole.VIEWER;
+        }
 
-            DatePickerDialog datePickerDialog = new DatePickerDialog(
-                    this,
-                    (view, yearOfDate, monthOfYear, dayOfMonth) -> {
-                        LocalDate selectedDate = LocalDate.of(yearOfDate, monthOfYear + 1, dayOfMonth);
-                        edtTaskDue.setText(selectedDate.format(dateFormatter));
-                    },
-                    year, month, day);
-            datePickerDialog.show();
-        });
+        // Chỉ cho phép pick date nếu là ADMIN
+        if (projectRole == ProjectRole.ADMIN) {
+            edtTaskDue.setOnClickListener(v -> {
+                final Calendar c = Calendar.getInstance();
+                int year = c.get(Calendar.YEAR);
+                int month = c.get(Calendar.MONTH);
+                int day = c.get(Calendar.DAY_OF_MONTH);
+
+                DatePickerDialog datePickerDialog = new DatePickerDialog(
+                        this,
+                        (view, yearOfDate, monthOfYear, dayOfMonth) -> {
+                            LocalDate selectedDate = LocalDate.of(yearOfDate, monthOfYear + 1, dayOfMonth);
+                            edtTaskDue.setText(selectedDate.format(dateFormatter));
+                        },
+                        year, month, day);
+                datePickerDialog.show();
+            });
+        } else {
+            edtTaskDue.setOnClickListener(null); // Vô hiệu hóa sự kiện click
+        }
     }
 
     private String getFileName(Uri uri) {

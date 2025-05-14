@@ -53,14 +53,49 @@ public class ProjectAdapter {
 
             itemView.setOnClickListener(v -> {
                 int projectId = project.getId();
-                context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
-                        .edit()
-                        .putInt("projectId", projectId)
-                        .apply();
-                Intent intent = new Intent(context, ProjectDetailsActivity.class);
-                intent.putExtra("projectName", project.getName());
-                context.startActivity(intent);
+
+                int userId = context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
+                        .getInt("userId", -1); // Lấy userId từ SharedPreferences
+
+                if (userId == -1) {
+                    Toast.makeText(context, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                APIService apiService = RetrofitCilent.getRetrofit().create(APIService.class);
+                Call<Map<String, Object>> call = apiService.getUserRole(projectId, userId);
+
+                call.enqueue(new retrofit2.Callback<Map<String, Object>>() {
+                    @Override
+                    public void onResponse(Call<Map<String, Object>> call, retrofit2.Response<Map<String, Object>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            Map<String, Object> data = response.body();
+                            String role = (String) data.get("role");
+
+                            // Lưu projectId nếu cần
+                            context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
+                                    .edit()
+                                    .putInt("projectId", projectId)
+                                    .apply();
+
+                            // Mở ProjectDetailsActivity
+                            Intent intent = new Intent(context, ProjectDetailsActivity.class);
+                            intent.putExtra("projectName", project.getName());
+                            intent.putExtra("role", role); // truyền role vào intent
+                            context.startActivity(intent);
+                        } else {
+                            Toast.makeText(context, "Không lấy được vai trò người dùng", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                        Toast.makeText(context, "Lỗi kết nối đến server!", Toast.LENGTH_SHORT).show();
+                        t.printStackTrace();
+                    }
+                });
             });
+
 
             ivDelete.setOnClickListener(v -> {
                 new AlertDialog.Builder(context)

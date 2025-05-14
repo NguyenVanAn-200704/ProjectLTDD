@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ui.Adapter.MemberAdapter;
 import com.example.ui.Adapter.TaskAdapter;
+import com.example.ui.Enum.ProjectRole;
 import com.example.ui.Model.Member;
 import com.example.ui.Model.Task;
 import com.example.ui.Model.User;
@@ -51,7 +52,7 @@ public class ProjectDetailsActivity extends AppCompatActivity implements MemberA
     private List<Member> memberList = new ArrayList<>();
     private MemberAdapter memberAdapter;
     private TaskAdapter taskAdapter;
-    private Button btnAddMember, btnNewProject;
+    private Button btnAddMember, btnNewTask;
     private ImageButton btnSearch, btnFilter;
     private TextInputEditText edtSearchTask;
     private int projectId;
@@ -66,10 +67,23 @@ public class ProjectDetailsActivity extends AppCompatActivity implements MemberA
 
         taskListContainer = findViewById(R.id.recyclerTasks);
         btnAddMember = findViewById(R.id.btnAddMemberDialog);
-        btnNewProject = findViewById(R.id.btnNewTask);
+        btnNewTask = findViewById(R.id.btnNewTask);
         btnSearch = findViewById(R.id.btnSearch);
         btnFilter = findViewById(R.id.btnFilter);
         edtSearchTask = findViewById(R.id.edtSearchTask);
+
+        // Lấy vai trò từ Intent
+        String role = getIntent().getStringExtra("role");
+        ProjectRole projectRole = role != null ? ProjectRole.valueOf(role) : ProjectRole.VIEWER; // Mặc định là VIEWER nếu role null
+
+        // Điều khiển hiển thị các nút dựa trên vai trò
+        if (projectRole == ProjectRole.ADMIN) {
+            btnAddMember.setVisibility(View.VISIBLE);
+            btnNewTask.setVisibility(View.VISIBLE);
+        } else {
+            btnAddMember.setVisibility(View.GONE);
+            btnNewTask.setVisibility(View.GONE);
+        }
 
         // Khởi tạo MemberAdapter với callback
         memberAdapter = new MemberAdapter(this, memberList, this);
@@ -81,22 +95,23 @@ public class ProjectDetailsActivity extends AppCompatActivity implements MemberA
             startActivity(intent);
             finish();
             Toast.makeText(this, "Không tìm thấy userId. Vui lòng đăng nhập lại.", Toast.LENGTH_SHORT).show();
-        } else {
-            fetchTasksFromAPI(projectId);
+            return;
         }
+
+        fetchTasksFromAPI(projectId);
 
         String projectName = getIntent().getStringExtra("projectName");
         TextView tvProjectTitle = findViewById(R.id.tvProjectTitle);
         tvProjectTitle.setText(projectName);
 
         // Khởi tạo RecyclerView và TaskAdapter
-        filteredTaskList.addAll(taskList); // Ban đầu hiển thị toàn bộ task
-        taskAdapter = new TaskAdapter(filteredTaskList);
+        filteredTaskList.addAll(taskList);
+        taskAdapter = new TaskAdapter(filteredTaskList, role, userId);// Ban đầu hiển thị toàn bộ task
         taskListContainer.setLayoutManager(new LinearLayoutManager(this));
         taskListContainer.setAdapter(taskAdapter);
 
         btnAddMember.setOnClickListener(v -> showAddMemberDialog());
-        btnNewProject.setOnClickListener(v -> {
+        btnNewTask.setOnClickListener(v -> {
             Intent intent = new Intent(ProjectDetailsActivity.this, AddTaskActivity.class);
             intent.putExtra("projectId", projectId);
             intent.putExtra("userId", userId);
@@ -130,7 +145,7 @@ public class ProjectDetailsActivity extends AppCompatActivity implements MemberA
                             int id = idNumber.intValue();
                             String title = (String) taskMap.get("title");
                             String status = (String) taskMap.get("status");
-                            String priority = (String) taskMap.get("priority"); // Giả sử API trả về priority
+                            String priority = (String) taskMap.get("priority");
                             String dueDateStr = (String) taskMap.get("dueDate");
 
                             // Parse user (khôi phục logic Assign)
@@ -145,7 +160,7 @@ public class ProjectDetailsActivity extends AppCompatActivity implements MemberA
                                 }
                             }
 
-                            LocalDate dueDate = LocalDate.parse(dueDateStr);
+                            LocalDate dueDate = dueDateStr != null ? LocalDate.parse(dueDateStr) : null;
                             Task task = new Task(id, dueDate, assignedUser, status, title, priority);
                             taskList.add(task);
                         }
@@ -221,7 +236,6 @@ public class ProjectDetailsActivity extends AppCompatActivity implements MemberA
 
         dialog.show();
     }
-
 
     private void applyFilters() {
         filteredTaskList.clear();

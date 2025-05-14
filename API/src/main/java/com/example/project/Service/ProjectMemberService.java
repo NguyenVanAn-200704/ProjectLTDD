@@ -145,4 +145,23 @@ public class ProjectMemberService {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
   }
+
+  public ResponseEntity<Map<String, Object>> findByUserIdAndProjectId(Integer projectId, Integer userId) {
+    Map<String, Object> response = new HashMap<>();
+    try {
+      ProjectMember projectMember = projectMemberRepository
+              .findByProjectIdAndUserId(projectId, userId)
+              .orElseThrow(() -> new RuntimeException("ProjectMember not found"));
+
+      response.put("role", projectMember.getRole().toString()); // hoặc để luôn là Enum nếu bạn muốn
+      response.put("status", HttpStatus.OK.value());
+
+      return ResponseEntity.status(HttpStatus.OK).body(response);
+    } catch (Exception e) {
+      response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+      response.put("message", "Lỗi: " + e.getMessage());
+
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+  }
 }

@@ -20,9 +20,13 @@ import java.util.List;
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
 
     private List<Task> taskList;
+    private String role; // Thêm trường role
+    private int userId; // Thêm trường userId
 
-    public TaskAdapter(List<Task> taskList) {
+    public TaskAdapter(List<Task> taskList, String role, int userId) {
         this.taskList = taskList;
+        this.role = role;
+        this.userId = userId;
     }
 
     public static class TaskViewHolder extends RecyclerView.ViewHolder {
@@ -52,18 +56,18 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         holder.tvTitle.setText(task.getTitle());
         holder.tvStatus.setText(task.getStatus());
         holder.tvAssign.setText(task.getUser() != null ? task.getUser().getName() : "None");
-        holder.tvDueDate.setText(task.getDueDate().toString());
-
+        holder.tvDueDate.setText(task.getDueDate() != null ? task.getDueDate().toString() : "None");
 
         holder.itemView.setOnClickListener(v -> {
             Context context = v.getContext();
             Intent intent = new Intent(context, TaskDetailActivity.class);
             intent.putExtra("taskId", task.getId());
-            // Sử dụng startActivityForResult nếu context là Activity
+            intent.putExtra("role", role); // Truyền role
+            intent.putExtra("userId", userId); // Truyền userId
             if (context instanceof Activity) {
                 ((Activity) context).startActivityForResult(intent, 123);
             } else {
-                context.startActivity(intent); // Fallback nếu không phải Activity
+                context.startActivity(intent);
             }
         });
     }

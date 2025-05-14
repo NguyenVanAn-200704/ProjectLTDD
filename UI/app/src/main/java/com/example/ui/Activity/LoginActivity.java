@@ -103,7 +103,6 @@ public class LoginActivity extends AppCompatActivity {
                     if (status == 200) {
                         Map<String, Object> userMap = (Map<String, Object>) responseBody.get("user");
                         int userId = ((Number) userMap.get("id")).intValue();
-
                         getSharedPreferences("UserPreferences", MODE_PRIVATE)
                                 .edit()
                                 .putInt("userId", userId)

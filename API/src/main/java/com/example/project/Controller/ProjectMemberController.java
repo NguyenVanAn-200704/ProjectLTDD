@@ -34,4 +34,8 @@ public class ProjectMemberController {
   ResponseEntity<Map<String, Object>> getAllMembers(@PathVariable Integer projectId) {
     return projectMemberService.getAllMembers(projectId);
   }
+  @GetMapping("/member/role")
+  ResponseEntity<Map<String, Object>> getUserRoles(@RequestParam Integer projectId, @RequestParam Integer userId) {
+    return projectMemberService.findByUserIdAndProjectId(projectId,userId);
+  }
 }

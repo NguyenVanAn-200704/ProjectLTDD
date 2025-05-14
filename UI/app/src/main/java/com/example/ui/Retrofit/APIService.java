@@ -82,4 +82,7 @@ public interface APIService {
     Call<Map<String,Object>> getTaskById(@Query("id") int id);
     @DELETE("/project/delete")
     Call<Map<String, Object>> deleteProject(@Query("id") Integer id);
+
+    @GET("/project/member/role")
+    Call<Map<String, Object>> getUserRole(@Query("projectId") Integer projectId,@Query("userId") Integer userId);
 }
