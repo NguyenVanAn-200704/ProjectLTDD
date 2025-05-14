@@ -43,8 +43,6 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     private String userEmail;
     private boolean isPasswordVisible = false;
     private int currentStep = 1; // 1: Email, 2: OTP, 3: Password
-    private TextView textViewBackToLogin;
-    private String userEmail; // Store email for later steps
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
