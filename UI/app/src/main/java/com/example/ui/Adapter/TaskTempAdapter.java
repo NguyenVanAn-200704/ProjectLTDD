@@ -1,47 +1,72 @@
 package com.example.ui.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.ui.Activity.TaskDetailActivity;
 import com.example.ui.Model.TaskTemp;
 import com.example.ui.R;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class TaskTempAdapter {
+public class TaskTempAdapter extends RecyclerView.Adapter<TaskTempAdapter.TaskViewHolder> {
+
     private Context context;
     private List<TaskTemp> taskList;
-    private LinearLayout container;
+    private OnTaskClickListener listener;
 
-    public TaskTempAdapter(Context context, List<TaskTemp> taskList, LinearLayout container) {
+    public interface OnTaskClickListener {
+        void onTaskClick(int taskId);
+    }
+
+    public TaskTempAdapter(Context context, List<TaskTemp> taskList, OnTaskClickListener listener) {
         this.context = context;
         this.taskList = taskList;
-        this.container = container;
+        this.listener = listener;
     }
-    public void loadTasks() {
-        container.removeAllViews();
-        LayoutInflater inflater = LayoutInflater.from(context);
 
-        // Formatter để định dạng ngày
+    @NonNull
+    @Override
+    public TaskViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View itemView = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_task, parent, false);
+        return new TaskViewHolder(itemView);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
+        TaskTemp task = taskList.get(position);
+        holder.tvTitle.setText(task.getTitle()); // Dòng 47 gây lỗi
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        holder.tvDueDate.setText("Due at: " + task.getDueDate().format(formatter));
 
-        for (TaskTemp task : taskList) {
-            View itemView = inflater.inflate(R.layout.item_task, container, false);
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onTaskClick(task.getId());
+            }
+        });
+    }
 
-            TextView tvName = itemView.findViewById(R.id.tvTaskName);
-            TextView tvMember = itemView.findViewById(R.id.tvDueDate);
+    @Override
+    public int getItemCount() {
+        return taskList.size();
+    }
 
-            tvName.setText(task.getTitle());
+    public static class TaskViewHolder extends RecyclerView.ViewHolder {
+        public TextView tvTitle, tvDueDate;
 
-            // Convert LocalDate -> String
-            String formattedDate = task.getDueDate().format(formatter);
-            tvMember.setText("Due at: " + formattedDate);
-
-            container.addView(itemView);
+        public TaskViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvTitle = itemView.findViewById(R.id.tvTaskName);
+            tvDueDate = itemView.findViewById(R.id.tvDueDate);
         }
     }
 }

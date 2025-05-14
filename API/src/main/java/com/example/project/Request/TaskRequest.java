@@ -18,7 +18,9 @@ public class TaskRequest {
 
   private Integer projectId;
 
-  private Integer userId;
+  private String email;
+
+  private String fileUrl;
 
   @NotNull(message = "DueDate không được để trống !")
   private LocalDate dueDate;

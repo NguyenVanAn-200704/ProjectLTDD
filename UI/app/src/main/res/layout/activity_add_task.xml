@@ -10,9 +10,11 @@
     tools:context=".Activity.AddTaskActivity">
 
     <!-- Tiêu đề và biểu tượng -->
+
+    <!-- Container box -->
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="130dp"
+        android:layout_height="141dp"
         android:paddingStart="16dp"
         android:paddingTop="12dp"
         android:paddingEnd="16dp"
@@ -24,25 +26,52 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:text="New Task"
+            android:textColor="#212121"
             android:textSize="28sp"
-            android:textStyle="bold"
-            android:textColor="#212121" />
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/btnAssign"
+            style="@style/Widget.MaterialComponents.Button"
             android:layout_width="129dp"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
             android:layout_below="@+id/imgTaskIcon"
             android:layout_alignParentEnd="true"
-            android:layout_marginStart="85dp"
-            android:layout_marginTop="28dp"
-            android:layout_marginEnd="17dp"
+            android:layout_marginStart="116dp"
+            android:layout_marginTop="23dp"
+            android:layout_marginEnd="11dp"
             android:layout_toEndOf="@+id/tvProjectTitle"
             android:backgroundTint="#2196F3"
-            android:text="Assign"
-            android:textColor="#FFFFFF"
             android:elevation="2dp"
-            style="@style/Widget.MaterialComponents.Button" />
+            android:text="Assign"
+            android:textColor="#FFFFFF" />
+
+        <TextView
+            android:id="@+id/tvAssignedTo"
+            android:layout_width="222dp"
+            android:layout_height="24dp"
+            android:layout_below="@+id/btnAssign"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="-25dp"
+            android:layout_marginEnd="163dp"
+            android:layout_marginBottom="23dp"
+            android:text="Assigned to: None"
+            android:textColor="#757575"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/btnClearAssign"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tvAssignedTo"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            android:text="Clear"
+            android:textSize="12sp"
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/imgTaskIcon"
@@ -53,7 +82,6 @@
             android:src="@drawable/ic_logo" />
     </RelativeLayout>
 
-    <!-- Container box -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -86,8 +114,7 @@
                 android:hint="Task Title"
                 android:textColor="#212121"
                 android:textSize="16sp"
-                android:padding="10dp"
-                android:text="Task Title" />
+                android:padding="10dp" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Description -->
@@ -111,8 +138,7 @@
                 android:hint="Description"
                 android:textColor="#212121"
                 android:textSize="16sp"
-                android:padding="10dp"
-                android:text="Description" />
+                android:padding="10dp" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Priority Spinner -->

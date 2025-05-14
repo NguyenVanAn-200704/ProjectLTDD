@@ -2,5 +2,7 @@
     <string name="app_name">UI</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
+    <string name="status_prompt">Select Status</string>
+    <string name="priority_prompt">Select Priority</string>
     <string name="re_enter_password">Re-enter Password</string>
 </resources>

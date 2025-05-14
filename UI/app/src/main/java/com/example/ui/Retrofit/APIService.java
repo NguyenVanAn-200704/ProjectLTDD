@@ -3,6 +3,9 @@ package com.example.ui.Retrofit;
 import com.example.ui.Model.Member;
 import com.example.ui.Request.CreateProjectRequest;
 import com.example.ui.Request.LoginRequest;
+import com.example.ui.Request.TaskRequest;
+import com.example.ui.Request.UpdateProjectMemberRequest;
+import com.example.ui.Request.UpdateTaskRequest;
 import com.example.ui.Request.UpdateUserRequest;
 import com.example.ui.Request.UserRequest;
 
@@ -10,6 +13,7 @@ import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
@@ -49,5 +53,23 @@ public interface APIService {
 
     @GET("/project/{projectId}/members")
     Call<Map<String, Object>> getAllMember(@Path("projectId") int projectId);
+
+    // Thêm API update member
+    @PUT("/project/member/update")
+    Call<Map<String, Object>> updateMember(@Body UpdateProjectMemberRequest updateMemberRequest);
+
+    // Thêm API delete member
+    @DELETE("/project/member/delete")
+    Call<Map<String, Object>> deleteMember(@Query("id") Integer id);
+
+    @POST("/project/task/add")
+    Call<Map<String, Object>> addTask(@Body TaskRequest taskRequest);
+
+    @PUT("/project/task/update")
+    Call<Map<String, Object>> updateTask(@Body UpdateTaskRequest updateTaskRequest);
+
+    @GET("/project/task/get")
+    Call<Map<String,Object>> getTaskById(@Query("id") int id);
+
 
 }

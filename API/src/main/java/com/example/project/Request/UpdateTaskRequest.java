@@ -18,9 +18,11 @@ public class UpdateTaskRequest {
 
   private String status;
 
+  private String fileUrl;
+
   private String priority;
 
-  private Integer userId;
+  private String email;
 
   @NotNull(message = "DueDate không được để trống !")
   private LocalDate dueDate;

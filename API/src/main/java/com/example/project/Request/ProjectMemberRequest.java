@@ -4,6 +4,9 @@ import lombok.Getter;
 
 @Getter
 public class ProjectMemberRequest {
+
+  private Integer id;
+
   private Integer projectId;
 
   private String email;

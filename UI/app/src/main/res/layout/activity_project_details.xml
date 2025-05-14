@@ -192,7 +192,7 @@
 
     <!-- Nút New Task -->
     <Button
-        android:id="@+id/btnNewProject"
+        android:id="@+id/btnNewTask"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:layout_gravity="end"

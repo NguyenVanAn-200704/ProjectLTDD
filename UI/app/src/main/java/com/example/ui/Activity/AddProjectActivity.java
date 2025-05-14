@@ -32,7 +32,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class AddProjectActivity extends AppCompatActivity {
+public class AddProjectActivity extends AppCompatActivity implements MemberAdapter.OnMemberActionListener{
     TextInputEditText editTextName;
     TextInputEditText editTextDescription;
     Button buttonAddProject;
@@ -49,8 +49,7 @@ public class AddProjectActivity extends AppCompatActivity {
         mapping();
 
         // Initialize member adapter with context
-        memberAdapter = new MemberAdapter(this, memberList);
-
+        memberAdapter = new MemberAdapter(this, memberList, this);
         buttonAddProject.setOnClickListener(v -> {
             if (editTextName.getText().toString().isEmpty() ||
                     editTextDescription.getText().toString().isEmpty()) {
@@ -239,5 +238,25 @@ public class AddProjectActivity extends AppCompatActivity {
             startActivity(new Intent(this, ProfileActivity.class));
             overridePendingTransition(0, 0);
         });
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+        super.onPointerCaptureChanged(hasCapture);
+    }
+
+    @Override
+    public void onUpdateMember(Member member, String newRole) {
+
+    }
+
+    @Override
+    public void onDeleteMember(Member member) {
+
+    }
+
+    @Override
+    public void onTaskUploadFailure(String errorMessage) {
+
     }
 }
