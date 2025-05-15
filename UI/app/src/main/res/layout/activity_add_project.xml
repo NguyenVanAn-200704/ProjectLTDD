@@ -28,22 +28,6 @@
             android:textStyle="bold"
             android:textColor="#212121" />
 
-        <Button
-            android:id="@+id/btnAddMember"
-            style="@style/Widget.MaterialComponents.Button"
-            android:layout_width="135dp"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/imgTaskIcon"
-            android:layout_alignParentEnd="true"
-            android:layout_marginStart="57dp"
-            android:layout_marginTop="53dp"
-            android:layout_marginEnd="2dp"
-            android:layout_toEndOf="@+id/tvProjectTitle"
-            android:backgroundTint="#2196F3"
-            android:elevation="2dp"
-            android:text="Add Member"
-            android:textColor="#FFFFFF" />
-
         <ImageView
             android:id="@+id/imgTaskIcon"
             android:layout_width="36dp"

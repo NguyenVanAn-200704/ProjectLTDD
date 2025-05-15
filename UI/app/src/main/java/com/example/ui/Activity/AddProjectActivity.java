@@ -36,10 +36,11 @@ public class AddProjectActivity extends AppCompatActivity implements MemberAdapt
     TextInputEditText editTextName;
     TextInputEditText editTextDescription;
     Button buttonAddProject;
-    Button btnAddMember;
     CreateProjectRequest createProjectRequest;
     List<Member> memberList = new ArrayList<>();
     MemberAdapter memberAdapter;
+
+    private int userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +49,7 @@ public class AddProjectActivity extends AppCompatActivity implements MemberAdapt
         setContentView(R.layout.activity_add_project);
         mapping();
 
-        int userId = getSharedPreferences("UserPreferences", MODE_PRIVATE).getInt("userId", -1);
+        userId = getSharedPreferences("UserPreferences", MODE_PRIVATE).getInt("userId", -1);
 
         memberAdapter = new MemberAdapter(this, memberList, userId,userId,this);
         buttonAddProject.setOnClickListener(v -> {
@@ -72,7 +73,6 @@ public class AddProjectActivity extends AppCompatActivity implements MemberAdapt
             }
         });
 
-        btnAddMember.setOnClickListener(v -> showAddMemberDialog());
 
         navigation();
     }
@@ -81,104 +81,8 @@ public class AddProjectActivity extends AppCompatActivity implements MemberAdapt
         editTextName = findViewById(R.id.editTextName);
         editTextDescription = findViewById(R.id.editTextDescription);
         buttonAddProject = findViewById(R.id.buttonAddProject);
-        btnAddMember = findViewById(R.id.btnAddMember);
     }
 
-    private void showAddMemberDialog() {
-
-        BottomSheetDialog dialog = new BottomSheetDialog(this);
-        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_member, null);
-        dialog.setContentView(dialogView);
-        View parentLayout = dialogView.getParent() instanceof View ? (View) dialogView.getParent() : null;
-        if (parentLayout != null) {
-            parentLayout.getLayoutParams().height = (int) (getResources().getDisplayMetrics().heightPixels * 0.85); // Chiếm 85% chiều cao màn hình
-        }
-
-
-        TextInputEditText edtEmail = dialogView.findViewById(R.id.edtEmail);
-        TextInputLayout tilEmail = dialogView.findViewById(R.id.tilEmail);
-        Spinner spinnerRole = dialogView.findViewById(R.id.spinnerRole);
-        Button btnAddMemberDialog = dialogView.findViewById(R.id.btnAddMember);
-        RecyclerView recyclerMembers = dialogView.findViewById(R.id.recyclerMembers);
-        ProgressBar progressBar = dialogView.findViewById(R.id.progressBar);
-
-        // Setup Spinner
-        List<String> roles = Arrays.asList("Admin", "Member", "Viewer");
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, roles);
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerRole.setAdapter(spinnerAdapter);
-
-        // Setup RecyclerView
-        recyclerMembers.setLayoutManager(new LinearLayoutManager(this));
-        recyclerMembers.setAdapter(memberAdapter);
-
-        btnAddMemberDialog.setOnClickListener(v -> {
-            String email = edtEmail.getText().toString().trim();
-            String role = spinnerRole.getSelectedItem().toString();
-
-            if (email.isEmpty() || !email.contains("@") || !email.contains(".")) {
-                tilEmail.setError("Vui lòng nhập email hợp lệ!");
-                return;
-            }
-
-            tilEmail.setError(null);
-            progressBar.setVisibility(View.VISIBLE);
-            btnAddMemberDialog.setEnabled(false);
-
-            // Gọi API kiểm tra email
-            APIService apiService = RetrofitCilent.getRetrofit().create(APIService.class);
-            Call<Map<String, Object>> call = apiService.checkUserByEmail(email);
-            call.enqueue(new Callback<Map<String, Object>>() {
-                @Override
-                public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-                    progressBar.setVisibility(View.GONE);
-                    btnAddMemberDialog.setEnabled(true);
-
-                    if (response.isSuccessful() && response.body() != null) {
-                        Map<String, Object> responseBody = response.body();
-                        int status = ((Number) responseBody.get("status")).intValue();
-                        if (status == 200) {
-                            // Lấy thông tin người dùng từ API
-                            Map<String, Object> userData = (Map<String, Object>) responseBody.get("data");
-                            String userEmail = userData.get("email").toString();
-                            String avatar = userData.get("avatar") != null ? userData.get("avatar").toString() : "";
-
-                            // Thêm thành viên vào danh sách
-                            memberList.add(new Member(userEmail, role, avatar));
-                            memberAdapter.notifyDataSetChanged();
-                            edtEmail.setText("");
-                            Toast.makeText(AddProjectActivity.this, "Đã thêm thành viên!", Toast.LENGTH_SHORT).show();
-                        } else {
-                            String message = responseBody.get("message").toString();
-                            tilEmail.setError(message);
-                            Toast.makeText(AddProjectActivity.this, "Lỗi: " + message, Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        try {
-                            String errorJson = response.errorBody().string();
-                            JSONObject jsonObject = new JSONObject(errorJson);
-                            String message = jsonObject.has("message") ? jsonObject.getString("message") : "Email không tồn tại!";
-                            tilEmail.setError(message);
-                            Toast.makeText(AddProjectActivity.this, "Lỗi: " + message, Toast.LENGTH_SHORT).show();
-                        } catch (Exception e) {
-                            tilEmail.setError("Lỗi kiểm tra email!");
-                            Toast.makeText(AddProjectActivity.this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                    progressBar.setVisibility(View.GONE);
-                    btnAddMemberDialog.setEnabled(true);
-                    tilEmail.setError("Lỗi kết nối!");
-                    Toast.makeText(AddProjectActivity.this, "Lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
-        });
-
-        dialog.show();
-    }
 
     private void create() {
         APIService apiService = RetrofitCilent.getRetrofit().create(APIService.class);

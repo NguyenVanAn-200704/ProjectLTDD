@@ -15,9 +15,10 @@ public class Member {
         this.role = role;
     }
 
-    public Member(String email, String role, String avatar) {
+    public Member(String email, Integer userId, String role, String avatar) {
         this.email = email;
         this.role = role;
+        this.userId = userId;
         this.avatar = avatar;
     }
 
